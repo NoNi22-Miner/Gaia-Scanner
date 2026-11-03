@@ -23,6 +23,7 @@ Pro tier (paid):
 - Owner: one bound owner device per org. If it is lost, the owner proves identity with a TOTP code from an authenticator app (e.g. Google Authenticator) set up at enrollment, then binds a new device. Design the details in phase 5.
 
 ## Open decisions: ask the user before coding
+- Full list per phase: docs/SPEC.md section 8. Spec: docs/SPEC.md.
 - Owner recovery details (phase 5): the authenticator must not live only on the owner phone, or a lost phone loses both. Backup codes? What happens to the old device after re-binding? Does the owner also sign in with Google (needed for Drive anyway)?
 - Member uploads: through the backend, or direct to Drive via resumable sessions created by the backend (not verified).
 - Is Play billing required for invoiced company plans? Not confirmed.
@@ -32,6 +33,7 @@ Pro tier (paid):
 - Does drive.file cover folders the app creates?
 - Can the app create files inside a folder the user picked with the Google Picker (PICKER_ALLOW_FOLDER_SELECTION)?
 - How one user's app instance sees files created by another user.
+- Under drive.file, can the Android app see files the backend created, if both use OAuth clients in the same Google Cloud project?
 - Licenses of any PDF library chosen. Read its LICENSE file.
 - Password-protected PDFs: per the docs, PdfRenderer throws SecurityException for them; a password option exists only from API 35 (LoadParams). The docs also advise rendering untrusted files in an isolated process.
 
