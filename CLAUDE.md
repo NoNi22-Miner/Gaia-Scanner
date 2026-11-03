@@ -52,6 +52,7 @@ Pro tier (paid):
 - 100-page A4 PDF: JPG at 150 DPI in about 1 s, PNG at 300 DPI in about 21 s. A 2000 x 2000 pt page at 600 DPI is capped to 4000 x 4000 px.
 - HEIC decodes on both. A 64 x 48 HEIC came back as 64 x 64 on API 29 (correct on 36).
 - PdfDocument stores images without JPEG compression: 10 photos (36 MB of JPEG) made a 192 MB PDF at 300 DPI and a 91 MB PDF at 200 DPI. Native memory grew about 12 MB per page until the file was written (bitmaps are not freed by hand, so part of that may be ours).
+- JpegPdfWriter on the same 10 photos: 21 MB PDF at 300 DPI, 9.5 MB at 200 DPI, 2.3 s. 100 pages: native heap flat at 5 MB (PdfDocument: 1.2 GB). Photos are re-encoded as JPEG quality 90, so there is a small quality loss.
 
 ## Data (metadata only; files stay on the phone and in Drive)
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.
