@@ -44,7 +44,7 @@ Pro tier (paid):
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.
 - Job: id, type, inputs, options, status, progress, error, times.
 - Document: id, name, kind, page count, size, local path, folder id, Drive file id, created, modified, trashed at.
-- Folder: id, name, parent id. Page: id, document id, order, image path, width, height.
+- Folder: id, name, parent id. Page: id, document id, order, image path, width, height, rotation (0, 90, 180, 270).
 - SyncRecord: document id, Drive file id, last synced, status.
 - Pro: Organization (plan, expiry, device limit 20, owner, Drive folder), Device (org, name, role, enrolled, last seen, status), Upload (org, device, name, size, hash, Drive file id, status), AuditLog, Invite, Subscription.
 
