@@ -22,7 +22,7 @@ import java.io.File
 class ImagesToPdfTest {
 
     @Test
-    fun pagesKeepOrderAndColors() = runBlocking {
+    fun pagesKeepOrderAndColors() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("order")
         val colors = listOf(Color.RED, Color.GREEN, Color.BLUE)
         val inputs = colors.mapIndexed { i, c ->
@@ -52,7 +52,7 @@ class ImagesToPdfTest {
     }
 
     @Test
-    fun userRotationTurnsLandscapeIntoPortrait() = runBlocking {
+    fun userRotationTurnsLandscapeIntoPortrait() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("rot")
         val img = File(dir, "wide.jpg").also { TestFiles.solidImage(it, 400, 200, Color.GRAY) }
         val out = File(dir, "out.pdf")
@@ -63,7 +63,7 @@ class ImagesToPdfTest {
     }
 
     @Test
-    fun exifOrientationIsApplied() = runBlocking {
+    fun exifOrientationIsApplied() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("exif")
         val img = File(dir, "tagged.jpg").also { TestFiles.solidImage(it, 400, 200, Color.GRAY) }
         ExifInterface(img).apply {
@@ -80,7 +80,7 @@ class ImagesToPdfTest {
 
     /** [test] item: how big PdfDocument makes a PDF from photos. Synthetic photos, so a rough guide. */
     @Test
-    fun measurePdfSizeFromPhotos() = runBlocking {
+    fun measurePdfSizeFromPhotos() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("size")
         val photos = (0 until 10).map { File(dir, "photo$it.jpg").also { f -> TestFiles.photoLikeJpeg(f, 4000, 3000, it) } }
         val inputBytes = photos.sumOf { it.length() }
@@ -102,7 +102,7 @@ class ImagesToPdfTest {
 
     /** [test] item: does PdfDocument keep every page in memory until writeTo()? */
     @Test
-    fun measureMemoryWithManyPages() = runBlocking {
+    fun measureMemoryWithManyPages() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("mem")
         val photo = File(dir, "photo.jpg").also { TestFiles.photoLikeJpeg(it, 2000, 1500, 7) }
         val inputs = List(100) { ImagesToPdf.Input(photo) }

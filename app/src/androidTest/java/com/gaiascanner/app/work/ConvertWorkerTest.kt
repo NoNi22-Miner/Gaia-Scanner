@@ -31,7 +31,7 @@ class ConvertWorkerTest {
     private val container = context.appContainer
 
     @Test
-    fun pdfToImagesJobCreatesImageDocument() = runBlocking {
+    fun pdfToImagesJobCreatesImageDocument() = runBlocking<Unit> {
         val dir = container.files.newDocumentDir()
         val pdf = File(dir, "report.pdf").also { TestFiles.makePdf(it, TestFiles.a4Pages(3)) }
         val pdfId = container.library.addPdfFile(pdf, "report")
@@ -62,7 +62,7 @@ class ConvertWorkerTest {
     }
 
     @Test
-    fun imagesToPdfJobUsesPageOrderAndRotation() = runBlocking {
+    fun imagesToPdfJobUsesPageOrderAndRotation() = runBlocking<Unit> {
         val tmp = TestFiles.tempDir("job-images")
         val sources = listOf(Color.RED, Color.BLUE).mapIndexed { i, c ->
             File(tmp, "img$i.jpg").also { TestFiles.solidImage(it, 400, 200, c) }
@@ -95,7 +95,7 @@ class ConvertWorkerTest {
     }
 
     @Test
-    fun cancelRequestStopsJob() = runBlocking {
+    fun cancelRequestStopsJob() = runBlocking<Unit> {
         val dir = container.files.newDocumentDir()
         val pdf = File(dir, "long.pdf").also { TestFiles.makePdf(it, TestFiles.a4Pages(5)) }
         val pdfId = container.library.addPdfFile(pdf, "long")
@@ -118,7 +118,7 @@ class ConvertWorkerTest {
     }
 
     @Test
-    fun missingInputFailsJobWithoutCrashing() = runBlocking {
+    fun missingInputFailsJobWithoutCrashing() = runBlocking<Unit> {
         val jobId = container.database.jobs().insert(
             JobEntity(
                 type = JobType.PDF_TO_IMAGES,

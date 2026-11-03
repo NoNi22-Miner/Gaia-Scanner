@@ -28,7 +28,7 @@ class PdfToImagesTest {
     private val password = "secret123" // Same as scripts/make-test-fixtures.py.
 
     @Test
-    fun pageSizesFollowDpi() = runBlocking {
+    fun pageSizesFollowDpi() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("dpi")
         val pdf = File(dir, "a4.pdf").also { TestFiles.makePdf(it, TestFiles.a4Pages(2)) }
 
@@ -47,7 +47,7 @@ class PdfToImagesTest {
     }
 
     @Test
-    fun blankAreaIsWhiteInJpg() = runBlocking {
+    fun blankAreaIsWhiteInJpg() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("white")
         val pdf = File(dir, "p.pdf").also { TestFiles.makePdf(it, TestFiles.a4Pages(1)) }
         val page = PdfToImages().convert(pdf, dir, "p", ImageFormat.JPG, 72, 95).single()
@@ -78,7 +78,7 @@ class PdfToImagesTest {
 
     /** [test] item: does RENDER_MODE_FOR_PRINT differ from RENDER_MODE_FOR_DISPLAY? */
     @Test
-    fun measureRenderModes() = runBlocking {
+    fun measureRenderModes() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("modes")
         val pdf = File(dir, "p.pdf").also { TestFiles.makePdf(it, TestFiles.a4Pages(1)) }
         val display = PdfToImages(PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY).convert(pdf, File(dir, "d"), "p", ImageFormat.PNG, 150, 90).single()
@@ -92,7 +92,7 @@ class PdfToImagesTest {
     }
 
     @Test
-    fun hugePageIsCappedAt16Megapixels() = runBlocking {
+    fun hugePageIsCappedAt16Megapixels() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("huge")
         val pdf = File(dir, "poster.pdf").also { TestFiles.makePdf(it, listOf(2000 to 2000)) }
         val start = System.currentTimeMillis()
@@ -150,7 +150,7 @@ class PdfToImagesTest {
     }
 
     @Test
-    fun hundredPagesAsJpgAt150AndPngAt300() = runBlocking {
+    fun hundredPagesAsJpgAt150AndPngAt300() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("hundred")
         val pdf = File(dir, "big.pdf").also { TestFiles.makePdf(it, TestFiles.a4Pages(100)) }
 

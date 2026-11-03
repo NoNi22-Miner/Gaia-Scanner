@@ -20,7 +20,7 @@ import java.io.File
 class FormatsTest {
 
     @Test
-    fun webpAndPngDecodeAndConvert() = runBlocking {
+    fun webpAndPngDecodeAndConvert() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("webp")
         val webpFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Bitmap.CompressFormat.WEBP_LOSSY
@@ -40,7 +40,7 @@ class FormatsTest {
 
     /** [test] item: does BitmapFactory decode HEIC on this Android version? */
     @Test
-    fun measureHeicSupport() = runBlocking {
+    fun measureHeicSupport() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("heic")
         val heic = TestFiles.asset("sample.heic", dir)
         val info = ImageDecoding.readInfo(heic)
