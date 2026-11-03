@@ -77,8 +77,8 @@ Untrusted files: the docs advise rendering them in an isolated process [docs]. [
 1. The user puts the images in order (drag to reorder) and can rotate any page by 90°. Rotation is saved per page and applied when drawing. The source image file is not changed.
 2. Decode each image downsampled to the size it will have on the page, and apply its EXIF orientation, then the user's rotation [test: photos from several phone brands].
 3. Page size [proposal]: Fit to image (default: page has the image's shape, long side 842 pt), A4, or Letter. Portrait or landscape chosen per image. Margins: none, small, or large.
-4. For each image: `PageInfo.Builder(width, height, number)` in points [docs], draw the bitmap centered on the page canvas, finish the page, free the bitmap.
-5. Write the document to a file and close it [docs].
+4. For each image: encode it as JPEG and write it as one page with our own writer (`JpegPdfWriter`), centered in the page box. Free the bitmap before the next image.
+5. Finish the file (page tree, cross-reference table, trailer).
 
 Must test before building on it:
 - [test] How PdfDocument stores bitmaps. Convert 20 phone photos and compare the PDF size with the inputs. If the PDF is much bigger, first try downscaling to about 200 DPI on the page. If it is still too big, evaluate a PDF library that embeds JPEG data directly (license check required).
@@ -119,7 +119,8 @@ Tested on a CI emulator at API 29, a CI emulator at the latest API, and one real
 - Delete removes a document and its files for good. Phase 3 replaces it with trash.
 - The PDF renderer runs in the app's own process. An isolated process is not built yet. Decide before phase 4, when Drive credentials will be on the phone.
 - Unlocking (Android 15+) keeps an unlocked copy of the PDF in app storage. The password is not stored.
-- Images placed in a PDF are reduced to at most 300 DPI on the page, never enlarged.
+- Images placed in a PDF are reduced to at most 300 DPI on the page, never enlarged, and saved as JPEG at quality 90. Transparent areas become white.
+- Images to PDF does not use Android's PdfDocument. Tests showed it stores photos uncompressed (10 photos, 36 MB, became a 192 MB PDF), so the app writes PDFs itself with JPEG data inside. Checked locally with Poppler (pdfinfo, pdftoppm) and on CI by reopening with PdfRenderer.
 - A failed or cancelled job does not stop the jobs queued after it. Cancel is a flag the runner checks before each page.
 - Long jobs run as WorkManager foreground work, type dataSync [docs]. The WorkManager docs warn that on Android 16, long-running workers can use up the app's job quota [docs].
 - Device tests run on CI emulators (API 29 and 36). They use synthetic photos, so the real-phone checks in 3.6 (camera, 50 real photos, Chrome/Drive/Acrobat) are still to do.

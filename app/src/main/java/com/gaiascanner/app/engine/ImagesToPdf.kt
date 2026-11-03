@@ -1,20 +1,29 @@
 package com.gaiascanner.app.engine
 
-import android.graphics.Paint
-import android.graphics.RectF
-import android.graphics.pdf.PdfDocument
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import com.gaiascanner.app.core.ConvertDefaults
 import com.gaiascanner.app.core.FailureReason
+import com.gaiascanner.app.core.JpegPdfWriter
 import com.gaiascanner.app.core.MarginOption
 import com.gaiascanner.app.core.PageMath
 import com.gaiascanner.app.core.PageSizeOption
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
-/** Draws images onto PDF pages with Android's built-in PdfDocument. */
-class ImagesToPdf(private val imageDpi: Int = ConvertDefaults.PDF_IMAGE_DPI) {
+/**
+ * Turns images into a PDF, one image per page, with [JpegPdfWriter].
+ * Each image is turned upright, scaled to at most [imageDpi] on the page,
+ * encoded as JPEG and written before the next one is decoded.
+ */
+class ImagesToPdf(
+    private val imageDpi: Int = ConvertDefaults.PDF_IMAGE_DPI,
+    private val jpegQuality: Int = ConvertDefaults.JPEG_QUALITY,
+) {
 
     data class Input(val file: File, val userRotation: Int = 0)
 
@@ -28,35 +37,66 @@ class ImagesToPdf(private val imageDpi: Int = ConvertDefaults.PDF_IMAGE_DPI) {
     ) {
         require(inputs.isNotEmpty()) { "No images" }
         output.parentFile?.mkdirs()
-        val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
-        val document = PdfDocument()
         try {
-            inputs.forEachIndexed { index, input ->
-                currentCoroutineContext().ensureActive()
-                checkCancelled()
-                val info = ImageDecoding.readInfo(input.file) ?: throw ConvertException(
-                    if (input.file.exists()) FailureReason.UNSUPPORTED_FORMAT else FailureReason.MISSING_FILE,
-                )
-                val (uprightW, uprightH) = info.uprightSize(input.userRotation)
-                val page = PageMath.pageSizeFor(uprightW, uprightH, pageSize)
-                val box = PageMath.fitInside(PageMath.contentBox(page, margin), uprightW, uprightH)
-                val (targetW, targetH) = PageMath.targetPixels(box.width, box.height, imageDpi, uprightW, uprightH)
-                val bitmap = ImageDecoding.decodeUpright(input.file, info, input.userRotation, targetW, targetH)
-
-                val pdfPage = document.startPage(PdfDocument.PageInfo.Builder(page.width, page.height, index + 1).create())
-                pdfPage.canvas.drawBitmap(bitmap, null, RectF(box.left, box.top, box.right, box.bottom), paint)
-                document.finishPage(pdfPage)
-                // Not recycled on purpose: whether PdfDocument still reads the pixels
-                // until writeTo() is not documented. The garbage collector frees it.
-                onProgress(index + 1, inputs.size)
+            FileOutputStream(output).buffered(BUFFER).use { stream ->
+                val writer = JpegPdfWriter(stream)
+                inputs.forEachIndexed { index, input ->
+                    currentCoroutineContext().ensureActive()
+                    checkCancelled()
+                    addPage(writer, input)
+                    onProgress(index + 1, inputs.size)
+                }
+                writer.finish()
             }
-            try {
-                FileOutputStream(output).use { document.writeTo(it) }
-            } catch (e: OutOfMemoryError) {
-                throw ConvertException(FailureReason.TOO_LARGE, e)
-            }
-        } finally {
-            document.close()
+        } catch (e: Throwable) {
+            output.delete()
+            throw e
         }
+    }
+
+    private fun addPage(writer: JpegPdfWriter, input: Input) {
+        val info = ImageDecoding.readInfo(input.file) ?: throw ConvertException(
+            if (input.file.exists()) FailureReason.UNSUPPORTED_FORMAT else FailureReason.MISSING_FILE,
+        )
+        val (uprightW, uprightH) = info.uprightSize(input.userRotation)
+        val page = PageMath.pageSizeFor(uprightW, uprightH, pageSize)
+        val box = PageMath.fitInside(PageMath.contentBox(page, margin), uprightW, uprightH)
+        val (targetW, targetH) = PageMath.targetPixels(box.width, box.height, imageDpi, uprightW, uprightH)
+
+        val bitmap = onWhite(ImageDecoding.decodeUpright(input.file, info, input.userRotation, targetW, targetH))
+        val pixelW = bitmap.width
+        val pixelH = bitmap.height
+        val jpeg = try {
+            ByteArrayOutputStream(bitmap.width * bitmap.height / 4).also { bytes ->
+                if (!bitmap.compress(Bitmap.CompressFormat.JPEG, jpegQuality.coerceIn(0, 100), bytes)) {
+                    throw ConvertException(FailureReason.UNKNOWN)
+                }
+            }.toByteArray()
+        } catch (e: OutOfMemoryError) {
+            throw ConvertException(FailureReason.TOO_LARGE, e)
+        } finally {
+            bitmap.recycle()
+        }
+        // Android's JPEG encoder writes 3-component (colour) JPEGs.
+        writer.addPage(page.width, page.height, jpeg, pixelW, pixelH, box)
+    }
+
+    /** JPEG has no transparency, so transparent pixels (PNG, WebP) become white, not black. */
+    private fun onWhite(bitmap: Bitmap): Bitmap {
+        if (!bitmap.hasAlpha()) return bitmap
+        val flat = try {
+            Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        } catch (e: OutOfMemoryError) {
+            bitmap.recycle()
+            throw ConvertException(FailureReason.TOO_LARGE, e)
+        }
+        flat.eraseColor(Color.WHITE)
+        Canvas(flat).drawBitmap(bitmap, 0f, 0f, null)
+        bitmap.recycle()
+        return flat
+    }
+
+    private companion object {
+        const val BUFFER = 256 * 1024
     }
 }

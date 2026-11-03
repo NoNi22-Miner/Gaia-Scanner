@@ -17,7 +17,8 @@ Pro tier (paid):
 - Drive roles have no add-only role, so Drive sharing cannot enforce Pro rule 4. Rules live in a small backend.
 - The owner's Drive folder is shared with nobody. Member devices only submit.
 - Free tier needs no login in v1.
-- Stack: native Android, Kotlin + Jetpack Compose. Use Android's built-in PdfRenderer (API 21+) to render pages to bitmaps and PdfDocument (API 19+) to write PDFs by drawing on each page's Canvas. Both are from the Android reference docs, not yet tested on a device.
+- Stack: native Android, Kotlin + Jetpack Compose. PDF to images uses Android's built-in PdfRenderer.
+- Images to PDF uses our own JpegPdfWriter (app/.../core/JpegPdfWriter.kt): JPEG data goes into the PDF unchanged, one page written at a time. Chosen in phase 2 because Android's PdfDocument stored photos uncompressed (see the test results below). No third-party PDF library.
 - Platforms: Android only in v1. Decide on iOS after v1 ships (the Google Picker docs do not mention iOS).
 - PC version: deferred until after mobile, not dropped. Not in the current phases. Earlier plan was Tauri or Electron with pdf.js and pdf-lib.
 - minSdk 29 (Android 10). Older, low-spec phones are out.
@@ -41,7 +42,16 @@ Pro tier (paid):
 - How one user's app instance sees files created by another user.
 - Under drive.file, can the Android app see files the backend created, if both use OAuth clients in the same Google Cloud project?
 - Licenses of any PDF library chosen. Read its LICENSE file.
-- Password-protected PDFs: per the docs, PdfRenderer throws SecurityException for them; a password option exists only from API 35 (LoadParams). The docs also advise rendering untrusted files in an isolated process.
+- The docs advise rendering untrusted PDFs in an isolated process. Not built yet.
+- Real phones: camera app photos at full size, 50 real photos to PDF, output opening in Chrome, Drive and Acrobat.
+
+## Tested on CI emulators, API 29 and 36 (phase 2, synthetic files)
+- PdfRenderer leaves blank areas transparent, so pages must be painted white first (done).
+- RENDER_MODE_FOR_PRINT and FOR_DISPLAY gave identical pixels on a simple page.
+- Password PDF without password: SecurityException, shown as PASSWORD. Unlocking with LoadParams and write() works on API 36.
+- 100-page A4 PDF: JPG at 150 DPI in about 1 s, PNG at 300 DPI in about 21 s. A 2000 x 2000 pt page at 600 DPI is capped to 4000 x 4000 px.
+- HEIC decodes on both. A 64 x 48 HEIC came back as 64 x 64 on API 29 (correct on 36).
+- PdfDocument stores images without JPEG compression: 10 photos (36 MB of JPEG) made a 192 MB PDF at 300 DPI and a 91 MB PDF at 200 DPI. Native memory grew about 12 MB per page until the file was written (bitmaps are not freed by hand, so part of that may be ours).
 
 ## Data (metadata only; files stay on the phone and in Drive)
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.

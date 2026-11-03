@@ -52,6 +52,26 @@ class ImagesToPdfTest {
     }
 
     @Test
+    fun transparentPngBecomesWhite() = runBlocking<Unit> {
+        val dir = TestFiles.tempDir("alpha")
+        val png = File(dir, "clear.png")
+        val bmp = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888) // fully transparent
+        java.io.FileOutputStream(png).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        val out = File(dir, "out.pdf")
+        ImagesToPdf().convert(listOf(ImagesToPdf.Input(png)), out, PageSizeOption.FIT, MarginOption.NONE)
+        val renderer = PdfRenderer(ParcelFileDescriptor.open(out, ParcelFileDescriptor.MODE_READ_ONLY))
+        val page = renderer.openPage(0)
+        val shown = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
+        shown.eraseColor(Color.RED) // anything not painted by the PDF stays red
+        page.render(shown, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+        val px = shown.getPixel(page.width / 2, page.height / 2)
+        assertTrue("center ${Integer.toHexString(px)}", Color.red(px) > 240 && Color.green(px) > 240 && Color.blue(px) > 240)
+        page.close()
+        renderer.close()
+        dir.deleteRecursively()
+    }
+
+    @Test
     fun userRotationTurnsLandscapeIntoPortrait() = runBlocking<Unit> {
         val dir = TestFiles.tempDir("rot")
         val img = File(dir, "wide.jpg").also { TestFiles.solidImage(it, 400, 200, Color.GRAY) }
