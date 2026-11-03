@@ -43,7 +43,7 @@ class ImagesToPdf(
                 inputs.forEachIndexed { index, input ->
                     currentCoroutineContext().ensureActive()
                     checkCancelled()
-                    addPage(writer, input)
+                    addPage(writer, input, pageSize, margin)
                     onProgress(index + 1, inputs.size)
                 }
                 writer.finish()
@@ -54,7 +54,7 @@ class ImagesToPdf(
         }
     }
 
-    private fun addPage(writer: JpegPdfWriter, input: Input) {
+    private fun addPage(writer: JpegPdfWriter, input: Input, pageSize: PageSizeOption, margin: MarginOption) {
         val info = ImageDecoding.readInfo(input.file) ?: throw ConvertException(
             if (input.file.exists()) FailureReason.UNSUPPORTED_FORMAT else FailureReason.MISSING_FILE,
         )
