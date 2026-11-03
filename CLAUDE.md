@@ -25,6 +25,9 @@ Pro tier (paid):
 - Rotating a page 90° before making a PDF is allowed (layout, not content editing).
 - Camera: a "Take photo" button opens the phone's own camera app. No in-app camera or scanner.
 - Owner: one bound owner device per org. If it is lost, the owner proves identity with a TOTP code from an authenticator app (e.g. Google Authenticator) set up at enrollment, then binds a new device. Design the details in phase 5.
+- Build (phase 2): AGP 9.5 with built-in Kotlin, Kotlin 2.4.21, KSP 2.3.13, Gradle 9.8.2, compileSdk 37, targetSdk 36. Package name com.gaiascanner.app is a placeholder; make it final before the first Play upload.
+- The cloud sandbox cannot reach dl.google.com or downloads.gradle.org, so the Android build runs only in GitHub Actions (.github/workflows/android.yml). scripts/core-tests-local.sh runs the plain-Kotlin tests locally.
+- Long jobs use WorkManager foreground work with type dataSync (the docs list "local file processing" under it).
 
 ## Open decisions: ask the user before coding
 - Full list per phase: docs/SPEC.md section 8. Spec: docs/SPEC.md.

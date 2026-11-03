@@ -114,6 +114,16 @@ Tested on a CI emulator at API 29, a CI emulator at the latest API, and one real
 - Results appear in a flat list (folders come in phase 3) and can be saved or shared.
 - Every [test] item in section 3 has its result written into CLAUDE.md, as verified or failed.
 
+### 3.7 Phase 2 as built (differences from the plan above)
+- Page order uses up and down buttons per page. Drag to reorder is not built yet.
+- Delete removes a document and its files for good. Phase 3 replaces it with trash.
+- The PDF renderer runs in the app's own process. An isolated process is not built yet. Decide before phase 4, when Drive credentials will be on the phone.
+- Unlocking (Android 15+) keeps an unlocked copy of the PDF in app storage. The password is not stored.
+- Images placed in a PDF are reduced to at most 300 DPI on the page, never enlarged.
+- A failed or cancelled job does not stop the jobs queued after it. Cancel is a flag the runner checks before each page.
+- Long jobs run as WorkManager foreground work, type dataSync [docs]. The WorkManager docs warn that on Android 16, long-running workers can use up the app's job quota [docs].
+- Device tests run on CI emulators (API 29 and 36). They use synthetic photos, so the real-phone checks in 3.6 (camera, 50 real photos, Chrome/Drive/Acrobat) are still to do.
+
 ## 4. Library (phase 3)
 
 - Folders: nested (parent id). Create, rename, move documents. Deleting a folder moves its contents to trash.
