@@ -17,14 +17,16 @@ Pro tier (paid):
 - Drive roles have no add-only role, so Drive sharing cannot enforce Pro rule 4. Rules live in a small backend.
 - The owner's Drive folder is shared with nobody. Member devices only submit.
 - Free tier needs no login in v1.
+- Stack: native Android, Kotlin + Jetpack Compose. Use Android's built-in PdfRenderer (API 21+) to render pages to bitmaps and PdfDocument (API 19+) to write PDFs by drawing on each page's Canvas. Both are from the Android reference docs, not yet tested on a device.
+- Platforms: Android only in v1. Decide on iOS after v1 ships (the Google Picker docs do not mention iOS).
+- PC version: deferred until after mobile, not dropped. Not in the current phases. Earlier plan was Tauri or Electron with pdf.js and pdf-lib.
+- Owner: one bound owner device per org. If it is lost, the owner proves identity with a TOTP code from an authenticator app (e.g. Google Authenticator) set up at enrollment, then binds a new device. Design the details in phase 5.
 
 ## Open decisions: ask the user before coding
-- Mobile stack. Android has a built-in PdfRenderer (API 21+) that renders pages to bitmaps, and a built-in PdfDocument (API 19+) that writes a PDF by drawing on each page's Canvas. Both are from the Android reference docs, not yet tested on a device.
-- Owner identity: a Google account with a bound device, or one physical phone. Lost-phone recovery.
+- Owner recovery details (phase 5): the authenticator must not live only on the owner phone, or a lost phone loses both. Backup codes? What happens to the old device after re-binding? Does the owner also sign in with Google (needed for Drive anyway)?
 - Member uploads: through the backend, or direct to Drive via resumable sessions created by the backend (not verified).
 - Is Play billing required for invoiced company plans? Not confirmed.
-- iOS: the Google Picker docs do not mention iOS.
-- The app was first planned for PC (Tauri or Electron, pdf.js, pdf-lib), then moved to mobile. Confirm the PC version is dropped.
+- Minimum Android version (minSdk). PdfRenderer needs API 21+; check the minSdk of the Compose and other libraries chosen.
 
 ## Unverified: prototype and test before building on them
 - Does drive.file cover folders the app creates?
