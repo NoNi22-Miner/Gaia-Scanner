@@ -56,6 +56,9 @@ Pro tier (paid):
 - HEIC decodes on both. A 64 x 48 HEIC came back as 64 x 64 on API 29 (correct on 36).
 - PdfDocument stores images without JPEG compression: 10 photos (36 MB of JPEG) made a 192 MB PDF at 300 DPI and a 91 MB PDF at 200 DPI. Native memory grew about 12 MB per page until the file was written (bitmaps are not freed by hand, so part of that may be ours).
 - JpegPdfWriter on the same 10 photos: 21 MB PDF at 300 DPI, 9.5 MB at 200 DPI, 2.3 s. 100 pages: native heap flat at 5 MB (PdfDocument: 1.2 GB). Photos are re-encoded as JPEG quality 90, so there is a small quality loss.
+- Edge detection (phase 2b, synthetic scenes): corners within 0.33% on wood, light-gray and dark backgrounds with uneven light, 18 to 51 ms; a plain background gives no page.
+- Filters on a 2480 x 3208 page: Clear 138 to 265 ms, Docs 97 to 116 ms, Color 174 to 300 ms, Photo 46 to 76 ms. Clear turned shaded paper to 255; Docs had no speckles or mid-tones. Smart fill on a 400 x 300 area: 30 to 60 ms.
+- Phone debug APK with OpenCV (arm64-v8a + armeabi-v7a): 36 MB zipped artifact (was 16.6 MB).
 
 ## Data (metadata only; files stay on the phone and in Drive)
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.
