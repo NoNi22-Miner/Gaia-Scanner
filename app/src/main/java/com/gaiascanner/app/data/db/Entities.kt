@@ -57,6 +57,8 @@ data class PageEntity(
     val height: Int,
     /** Extra clockwise turn chosen by the user: 0, 90, 180 or 270. */
     val rotation: Int = 0,
+    /** Perspective crop as Quad.serialize() text, or null for the whole image. Added in DB version 2. */
+    val crop: String? = null,
 )
 
 @Entity(tableName = "jobs")

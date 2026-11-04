@@ -18,14 +18,43 @@
     <string name="import_pdfs">Import PDFs</string>
     <string name="import_gallery">Images from gallery</string>
     <string name="import_image_files">Image files</string>
-    <string name="take_photo">Take photo</string>
-    <string name="no_camera_app">No camera app found on this phone.</string>
+    <string name="take_photo">Camera</string>
     <plurals name="imported_files">
         <item quantity="one">Imported %d file.</item>
         <item quantity="other">Imported %d files.</item>
     </plurals>
     <string name="import_with_failures">%1$s Not imported: %2$s</string>
     <string name="import_with_failures_more">%1$s Not imported: %2$s (and %3$d more)</string>
+
+    <!-- Camera -->
+    <string name="no_camera">Could not start the camera.</string>
+    <string name="photo_failed">Could not take the photo. Try again.</string>
+    <string name="camera_permission_needed">Gaia Scanner needs the camera to take photos of documents.</string>
+    <string name="action_allow_camera">Allow camera</string>
+    <string name="action_open_settings">Open settings</string>
+    <string name="action_close">Close</string>
+    <string name="action_shutter">Take photo</string>
+    <string name="action_done">Done</string>
+    <string name="action_discard">Discard</string>
+    <string name="mode_single">Single</string>
+    <string name="mode_batch">Batch</string>
+    <string name="flash_off">Flash off</string>
+    <string name="flash_auto">Flash auto</string>
+    <string name="flash_on">Flash on</string>
+    <string name="discard_photos_title">Discard photos?</string>
+    <plurals name="discard_photos_body">
+        <item quantity="one">%d photo you took will be lost.</item>
+        <item quantity="other">%d photos you took will be lost.</item>
+    </plurals>
+
+    <!-- Adjust -->
+    <string name="adjust_title">Adjust page %1$d of %2$d</string>
+    <string name="adjust_hint">Drag the four corners onto the edges of the page. The app straightens it.</string>
+    <string name="action_adjust">Crop and rotate</string>
+    <string name="tap_to_adjust">Tap to crop or rotate</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_next">Next</string>
+    <string name="action_skip">Skip</string>
 
     <!-- Document -->
     <string name="action_back">Back</string>

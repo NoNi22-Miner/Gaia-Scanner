@@ -2,9 +2,13 @@ package com.gaiascanner.app.engine
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Matrix
+import android.graphics.Paint
 import androidx.exifinterface.media.ExifInterface
+import com.gaiascanner.app.core.CropRotation
 import com.gaiascanner.app.core.ExifTransform
+import com.gaiascanner.app.core.Quad
 import com.gaiascanner.app.core.FailureReason
 import com.gaiascanner.app.core.PageMath
 import com.gaiascanner.app.core.Rotation
@@ -88,17 +92,78 @@ object ImageDecoding {
         return result
     }
 
-    /** Upright thumbnail whose longest side is about [maxSide] pixels, or null. */
-    fun decodeThumbnail(file: File, maxSide: Int, userRotation: Int): Bitmap? = try {
+    /** Final size of a page image: upright, then [crop], then [userRotation]. */
+    fun finalSize(info: Info, crop: Quad?, userRotation: Int): Pair<Int, Int> {
+        val (w, h) = info.uprightSize()
+        return CropRotation.finalSize(w, h, crop, userRotation)
+    }
+
+    /**
+     * Decodes a page image as it should appear: upright (EXIF), then cropped and
+     * straightened with [crop], then turned by [userRotation]. [targetWidth] x
+     * [targetHeight] is the final size and should keep the aspect of [finalSize].
+     */
+    fun decodeFinal(file: File, info: Info, crop: Quad?, userRotation: Int, targetWidth: Int, targetHeight: Int): Bitmap {
+        if (crop == null || crop.isFullFrame) {
+            return decodeUpright(file, info, userRotation, targetWidth, targetHeight)
+        }
+        val (uw, uh) = info.uprightSize()
+        val (finalW, _) = finalSize(info, crop, userRotation)
+        val scale = targetWidth / finalW.toDouble()
+        // Decode the whole upright image at the scale the cropped part needs.
+        val upright = decodeUpright(
+            file,
+            info,
+            0,
+            max(1, (uw * scale).roundToInt()),
+            max(1, (uh * scale).roundToInt()),
+        )
+        // Cropped size before the user's rotation.
+        val (outW, outH) = Rotation.rotatedSize(targetWidth, targetHeight, userRotation)
+        val warped = try {
+            Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
+        } catch (e: OutOfMemoryError) {
+            upright.recycle()
+            throw ConvertException(FailureReason.TOO_LARGE, e)
+        }
+        val sw = upright.width.toFloat()
+        val sh = upright.height.toFloat()
+        val src = crop.corners.flatMap { listOf(it.x * sw, it.y * sh) }.toFloatArray()
+        val dst = floatArrayOf(0f, 0f, outW.toFloat(), 0f, outW.toFloat(), outH.toFloat(), 0f, outH.toFloat())
+        val matrix = Matrix()
+        // Maps the four crop corners onto the corners of the output: a perspective straighten.
+        if (!matrix.setPolyToPoly(src, 0, dst, 0, 4)) {
+            warped.recycle()
+            upright.recycle()
+            throw ConvertException(FailureReason.UNKNOWN)
+        }
+        Canvas(warped).drawBitmap(upright, matrix, Paint(Paint.FILTER_BITMAP_FLAG))
+        upright.recycle()
+
+        val user = Rotation.normalize(userRotation)
+        if (user == 0) return warped
+        val turned = try {
+            Bitmap.createBitmap(warped, 0, 0, warped.width, warped.height, Matrix().apply { postRotate(user.toFloat()) }, true)
+        } catch (e: OutOfMemoryError) {
+            warped.recycle()
+            throw ConvertException(FailureReason.TOO_LARGE, e)
+        }
+        if (turned !== warped) warped.recycle()
+        return turned
+    }
+
+    /** Thumbnail as the page will appear, longest side about [maxSide] pixels, or null. */
+    fun decodeThumbnail(file: File, maxSide: Int, userRotation: Int, crop: Quad? = null): Bitmap? = try {
         val info = readInfo(file)
         if (info == null) {
             null
         } else {
-            val (w, h) = info.uprightSize(userRotation)
+            val (w, h) = finalSize(info, crop, userRotation)
             val scale = minOf(1.0, maxSide.toDouble() / max(w, h))
-            decodeUpright(
+            decodeFinal(
                 file,
                 info,
+                crop,
                 userRotation,
                 max(1, (w * scale).roundToInt()),
                 max(1, (h * scale).roundToInt()),

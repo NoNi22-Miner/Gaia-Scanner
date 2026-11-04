@@ -3,6 +3,7 @@ package com.gaiascanner.app.ui.document
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -71,6 +71,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gaiascanner.app.R
 import com.gaiascanner.app.appContainer
 import com.gaiascanner.app.core.ConvertDefaults
+import com.gaiascanner.app.core.CropRotation
+import com.gaiascanner.app.core.Quad
 import com.gaiascanner.app.core.DocumentKind
 import com.gaiascanner.app.core.ImageFormat
 import com.gaiascanner.app.core.MarginOption
@@ -80,7 +82,6 @@ import com.gaiascanner.app.data.db.DocumentEntity
 import com.gaiascanner.app.data.db.PageEntity
 import com.gaiascanner.app.ui.components.ChoiceRow
 import com.gaiascanner.app.ui.components.Thumbnail
-import com.gaiascanner.app.ui.components.rememberCameraLauncher
 import com.gaiascanner.app.ui.components.rememberNotificationPermissionRequest
 import com.gaiascanner.app.ui.formatSize
 import com.gaiascanner.app.ui.marginLabel
@@ -94,7 +95,13 @@ private val IMAGE_MIME_TYPES = arrayOf("image/jpeg", "image/png", "image/webp", 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DocumentScreen(documentId: Long, onBack: () -> Unit, onOpenJobs: () -> Unit) {
+fun DocumentScreen(
+    documentId: Long,
+    onBack: () -> Unit,
+    onOpenJobs: () -> Unit,
+    onOpenCamera: (Long) -> Unit,
+    onAdjustPage: (Long) -> Unit,
+) {
     val context = LocalContext.current
     val container = context.appContainer
     val vm: DocumentViewModel = viewModel(key = "document-$documentId") { DocumentViewModel(container, documentId) }
@@ -169,12 +176,12 @@ fun DocumentScreen(documentId: Long, onBack: () -> Unit, onOpenJobs: () -> Unit)
                 pages = pages,
                 padding = padding,
                 onMove = vm::movePage,
-                onRotate = vm::rotatePage,
+                onAdjust = onAdjustPage,
                 onRemove = vm::removePage,
                 onMakePdf = { showMakePdf = true },
                 onSave = { saveFolder.launch(null) },
                 onAddImages = vm::addImages,
-                onAddPhoto = vm::addPhoto,
+                onOpenCamera = { onOpenCamera(doc.id) },
             )
         }
     }
@@ -275,12 +282,12 @@ private fun ImagesContent(
     pages: List<PageEntity>,
     padding: PaddingValues,
     onMove: (Long, Int) -> Unit,
-    onRotate: (Long) -> Unit,
+    onAdjust: (Long) -> Unit,
     onRemove: (Long) -> Unit,
     onMakePdf: () -> Unit,
     onSave: () -> Unit,
     onAddImages: (List<android.net.Uri>) -> Unit,
-    onAddPhoto: (java.io.File) -> Unit,
+    onOpenCamera: () -> Unit,
 ) {
     val pickGallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) onAddImages(uris)
@@ -288,7 +295,6 @@ private fun ImagesContent(
     val browse = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) onAddImages(uris)
     }
-    val camera = rememberCameraLauncher(onAddPhoto)
     var addMenu by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
@@ -306,7 +312,7 @@ private fun ImagesContent(
                         isLast = index == pages.lastIndex,
                         onUp = { onMove(page.id, -1) },
                         onDown = { onMove(page.id, 1) },
-                        onRotate = { onRotate(page.id) },
+                        onAdjust = { onAdjust(page.id) },
                         onRemove = { onRemove(page.id) },
                     )
                     HorizontalDivider()
@@ -338,7 +344,7 @@ private fun ImagesContent(
                         })
                         DropdownMenuItem(text = { Text(stringResource(R.string.take_photo)) }, onClick = {
                             addMenu = false
-                            camera.takePhoto()
+                            onOpenCamera()
                         })
                     }
                 }
@@ -356,30 +362,29 @@ private fun PageRow(
     isLast: Boolean,
     onUp: () -> Unit,
     onDown: () -> Unit,
-    onRotate: () -> Unit,
+    onAdjust: () -> Unit,
     onRemove: () -> Unit,
 ) {
     Row(
         Modifier
             .fillMaxWidth()
+            .clickable(onClickLabel = stringResource(R.string.action_adjust), onClick = onAdjust)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Thumbnail(page.imagePath, isPdf = false, rotation = page.rotation, size = 72.dp)
+        Thumbnail(page.imagePath, isPdf = false, rotation = page.rotation, size = 72.dp, crop = page.crop)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.page_number, number), style = MaterialTheme.typography.titleSmall)
-            val (w, h) = com.gaiascanner.app.core.Rotation.rotatedSize(page.width, page.height, page.rotation)
+            val (w, h) = CropRotation.finalSize(page.width, page.height, Quad.parse(page.crop), page.rotation)
             Text("$w × $h", style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(R.string.tap_to_adjust), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
         }
         IconButton(onClick = onUp, enabled = !isFirst) {
             Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.action_move_up))
         }
         IconButton(onClick = onDown, enabled = !isLast) {
             Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.action_move_down))
-        }
-        IconButton(onClick = onRotate) {
-            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.action_rotate))
         }
         IconButton(onClick = onRemove) {
             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_remove_page))

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.io.File
 
 class LibraryViewModel(private val container: AppContainer) : ViewModel() {
 
@@ -34,10 +33,6 @@ class LibraryViewModel(private val container: AppContainer) : ViewModel() {
 
     fun importImages(uris: List<Uri>) = viewModelScope.launch {
         localMessages.emit(importSummary(container.appContext, container.library.importImages(uris)))
-    }
-
-    fun importPhoto(file: File) = viewModelScope.launch {
-        localMessages.emit(importSummary(container.appContext, container.library.importPhoto(file, null)))
     }
 
     fun say(text: String) {

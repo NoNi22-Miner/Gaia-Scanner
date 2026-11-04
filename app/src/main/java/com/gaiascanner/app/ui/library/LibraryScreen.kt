@@ -53,14 +53,18 @@ import com.gaiascanner.app.appContainer
 import com.gaiascanner.app.core.DocumentKind
 import com.gaiascanner.app.data.db.DocumentEntity
 import com.gaiascanner.app.ui.components.Thumbnail
-import com.gaiascanner.app.ui.components.rememberCameraLauncher
 import com.gaiascanner.app.ui.formatSize
 
 private val IMAGE_MIME_TYPES = arrayOf("image/jpeg", "image/png", "image/webp", "image/heic", "image/heif")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(onOpenDocument: (Long) -> Unit, onOpenJobs: () -> Unit, onOpenSettings: () -> Unit) {
+fun LibraryScreen(
+    onOpenDocument: (Long) -> Unit,
+    onOpenJobs: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenCamera: () -> Unit,
+) {
     val context = LocalContext.current
     val container = context.appContainer
     val vm: LibraryViewModel = viewModel { LibraryViewModel(container) }
@@ -78,8 +82,6 @@ fun LibraryScreen(onOpenDocument: (Long) -> Unit, onOpenJobs: () -> Unit, onOpen
     val browseImages = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) vm.importImages(uris)
     }
-    val camera = rememberCameraLauncher { vm.importPhoto(it) }
-    val noCamera = stringResource(R.string.no_camera_app)
     var menuOpen by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -120,7 +122,7 @@ fun LibraryScreen(onOpenDocument: (Long) -> Unit, onOpenJobs: () -> Unit, onOpen
                     })
                     DropdownMenuItem(text = { Text(stringResource(R.string.take_photo)) }, onClick = {
                         menuOpen = false
-                        if (!camera.takePhoto()) vm.say(noCamera)
+                        onOpenCamera()
                     })
                 }
             }

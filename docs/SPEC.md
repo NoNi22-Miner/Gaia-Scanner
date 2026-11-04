@@ -12,9 +12,9 @@ Labels used below:
 
 ### Free v1 (phases 2 and 3)
 - Import many PDFs and images at once. Inputs: PDF, JPG, PNG, plus WebP and HEIC/HEIF where the phone can decode them.
-- Take photo: a button that opens the phone's own camera app and brings the photo back into the app.
+- Camera: the app's own camera screen, Single or Batch. Photos then open in the Adjust screen.
 - PDF to JPG or PNG: one image per page, at a chosen DPI.
-- Images to one PDF, pages in the order the user sets, each page can be rotated 90°. No watermark.
+- Images to one PDF, pages in the order the user sets. Each page can be cropped (4 corners, straightened) and rotated 90° on the Adjust screen. No watermark.
 - Library: folders, trash, sorting.
 - Export: save to a folder on the phone, or share through the Android share sheet (Drive app, email, chat). No login.
 
@@ -22,7 +22,7 @@ Labels used below:
 Auto-upload to a Drive folder, auto-create folders there, up to 20 devices, members can only add. See CLAUDE.md.
 
 ### Out of scope
-An in-app camera or scanner (edge detection, crop), filters, markup, OCR, Word, editing page content, merging or splitting PDFs, ads.
+Automatic edge detection, filters, markup, OCR, Word, editing page content, merging or splitting PDFs, ads.
 
 ## 2. Stack
 
@@ -124,6 +124,15 @@ Tested on a CI emulator at API 29, a CI emulator at the latest API, and one real
 - A failed or cancelled job does not stop the jobs queued after it. Cancel is a flag the runner checks before each page.
 - Long jobs run as WorkManager foreground work, type dataSync [docs]. The WorkManager docs warn that on Android 16, long-running workers can use up the app's job quota [docs].
 - Device tests run on CI emulators (API 29 and 36). They use synthetic photos, so the real-phone checks in 3.6 (camera, 50 real photos, Chrome/Drive/Acrobat) are still to do.
+
+### 3.8 Camera and Adjust (added after phase 2 review)
+Decided by the project owner after testing plans:
+- **In-app camera (CameraX).** Phone camera apps can stamp a watermark or time mark on photos (for example "Shot on ..."). Taking photos inside the app avoids that. [test: on real phones, confirm no watermark and full resolution]
+- **Single mode:** one shot, then the Adjust screen. **Batch mode:** shoot many in a row, tap Done; all photos go into one document in shooting order, then Adjust opens for each page in turn.
+- Flash: off, auto, on. Photos are saved in the orientation the phone is held (OrientationEventListener, as in the CameraX docs) [test on phones].
+- **Adjust screen:** drag 4 corners onto the page edges; the app straightens that area into a rectangle with Android's Matrix.setPolyToPoly. Rotate turns the page 90°. Reset, Next, Skip. Tapping a page in a document opens it too. The rotate button left the page list.
+- The crop is stored per page as 4 corner fractions of the upright image (pages.crop, database version 2 with a migration from version 1). Images to PDF applies crop, then rotation.
+- No automatic edge detection: that would need an image library or ML model and a license check.
 
 ## 4. Library (phase 3)
 

@@ -3,6 +3,7 @@ package com.gaiascanner.app
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.LruCache
+import com.gaiascanner.app.core.Quad
 import com.gaiascanner.app.data.Exporter
 import com.gaiascanner.app.data.FileStore
 import com.gaiascanner.app.data.LibraryRepository
@@ -46,9 +47,9 @@ class ThumbnailCache {
         override fun sizeOf(key: String, value: Bitmap) = value.byteCount
     }
 
-    suspend fun image(path: String, rotation: Int, maxSide: Int): Bitmap? =
-        load("img|$path|$rotation|$maxSide|${File(path).lastModified()}") {
-            ImageDecoding.decodeThumbnail(File(path), maxSide, rotation)
+    suspend fun image(path: String, rotation: Int, maxSide: Int, crop: String? = null): Bitmap? =
+        load("img|$path|$rotation|$crop|$maxSide|${File(path).lastModified()}") {
+            ImageDecoding.decodeThumbnail(File(path), maxSide, rotation, Quad.parse(crop))
         }
 
     suspend fun pdf(path: String, maxWidth: Int): Bitmap? =

@@ -44,7 +44,7 @@ interface PageDao {
     suspend fun maxSortIndex(documentId: Long): Int
 
     @Insert
-    suspend fun insertAll(pages: List<PageEntity>)
+    suspend fun insertAll(pages: List<PageEntity>): List<Long>
 
     @Update
     suspend fun update(page: PageEntity)

@@ -7,6 +7,7 @@ import androidx.room.withTransaction
 import com.gaiascanner.app.core.DocumentKind
 import com.gaiascanner.app.core.FailureReason
 import com.gaiascanner.app.core.FileNames
+import com.gaiascanner.app.core.Quad
 import com.gaiascanner.app.core.Rotation
 import com.gaiascanner.app.data.db.AppDatabase
 import com.gaiascanner.app.data.db.DocumentEntity
@@ -25,7 +26,13 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
     /** A file that failed to import, with its name and the reason. */
     data class ImportFailure(val name: String, val reason: FailureReason)
 
-    data class ImportResult(val documentIds: List<Long>, val imported: Int, val failures: List<ImportFailure>)
+    data class ImportResult(
+        val documentIds: List<Long>,
+        val imported: Int,
+        val failures: List<ImportFailure>,
+        /** Ids of the image pages this import added, in order. */
+        val pageIds: List<Long> = emptyList(),
+    )
 
     val documents: Flow<List<DocumentEntity>> = db.documents().observeAll()
 
@@ -36,6 +43,8 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
     suspend fun getDocument(id: Long): DocumentEntity? = db.documents().get(id)
 
     suspend fun getPages(documentId: Long): List<PageEntity> = db.pages().getForDocument(documentId)
+
+    suspend fun getPage(pageId: Long): PageEntity? = db.pages().get(pageId)
 
     /** Each PDF becomes its own document. */
     suspend fun importPdfs(uris: List<Uri>): ImportResult = withContext(Dispatchers.IO) {
@@ -92,13 +101,27 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
             addImages(sources, intoDocumentId, newName = null)
         }
 
-    /** Imports a photo from the camera app. The file is moved, not copied. */
-    suspend fun importPhoto(photo: File, intoDocumentId: Long?): ImportResult = withContext(Dispatchers.IO) {
-        val name = "Photo_${FileNames.stamp(java.time.LocalDateTime.now())}.jpg"
-        val source = ImageSource(name, "image/jpeg") { target -> files.moveFile(photo, target) }
-        val result = addImages(listOf(source), intoDocumentId, newName = FileNames.baseName(name))
-        photo.delete()
+    /**
+     * Imports photos from the in-app camera, in shooting order. The files are
+     * moved, not copied. They join [intoDocumentId] if given, otherwise they
+     * form one new document named after the time.
+     */
+    suspend fun importPhotos(photos: List<File>, intoDocumentId: Long?): ImportResult = withContext(Dispatchers.IO) {
+        val stamp = FileNames.stamp(java.time.LocalDateTime.now())
+        val sources = photos.mapIndexed { i, photo ->
+            ImageSource("Photo_${stamp}_${i + 1}.jpg", "image/jpeg") { target -> files.moveFile(photo, target) }
+        }
+        val result = addImages(sources, intoDocumentId, newName = "Photo_$stamp")
+        photos.forEach { it.delete() }
         result
+    }
+
+    /** Saves the crop and rotation chosen on the Adjust screen. A full-frame crop is stored as none. */
+    suspend fun setPageAdjust(pageId: Long, crop: Quad?, rotation: Int) {
+        val page = db.pages().get(pageId) ?: return
+        val stored = crop?.takeUnless { it.isFullFrame }?.serialize()
+        db.pages().update(page.copy(crop = stored, rotation = Rotation.normalize(rotation)))
+        touch(page.documentId)
     }
 
     private class ImageSource(val displayName: String, val mimeType: String?, val writeTo: (File) -> Unit)
@@ -131,6 +154,7 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
             if (existing == null) dir.deleteRecursively()
             return ImportResult(emptyList(), 0, failures)
         }
+        var pageIds: List<Long> = emptyList()
 
         val now = System.currentTimeMillis()
         val documentId = db.withTransaction {
@@ -145,11 +169,11 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
                     modifiedAt = now,
                 ),
             )
-            db.pages().insertAll(pages.map { it.copy(documentId = id) })
+            pageIds = db.pages().insertAll(pages.map { it.copy(documentId = id) })
             refreshImageDocument(id)
             id
         }
-        return ImportResult(listOf(documentId), pages.size, failures)
+        return ImportResult(listOf(documentId), pages.size, failures, pageIds)
     }
 
     /** Registers image files already in their own library folder as a new document. */

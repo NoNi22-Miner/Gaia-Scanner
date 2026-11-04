@@ -68,16 +68,10 @@ class DocumentViewModel(private val container: AppContainer, private val documen
 
     fun movePage(pageId: Long, delta: Int) = viewModelScope.launch { container.library.movePage(documentId, pageId, delta) }
 
-    fun rotatePage(pageId: Long) = viewModelScope.launch { container.library.rotatePage(pageId) }
-
     fun removePage(pageId: Long) = viewModelScope.launch { container.library.removePage(pageId) }
 
     fun addImages(uris: List<Uri>) = viewModelScope.launch {
         _messages.emit(Message(importSummary(context, container.library.importImages(uris, documentId))))
-    }
-
-    fun addPhoto(file: File) = viewModelScope.launch {
-        _messages.emit(Message(importSummary(context, container.library.importPhoto(file, documentId))))
     }
 
     /** The screen closes itself when the document disappears from the database. */

@@ -12,6 +12,7 @@ import com.gaiascanner.app.core.JobStatus
 import com.gaiascanner.app.core.JobType
 import com.gaiascanner.app.core.MarginOption
 import com.gaiascanner.app.core.PageSizeOption
+import com.gaiascanner.app.core.Quad
 import com.gaiascanner.app.data.Exporter
 import com.gaiascanner.app.data.FileStore
 import com.gaiascanner.app.data.LibraryRepository
@@ -137,7 +138,7 @@ class ConversionRunner(
         val name = FileNames.pdfName(base, LocalDateTime.now())
         val staged = File(workDir, name)
         ImagesToPdf().convert(
-            inputs = pages.map { ImagesToPdf.Input(File(it.imagePath), it.rotation) },
+            inputs = pages.map { ImagesToPdf.Input(File(it.imagePath), it.rotation, Quad.parse(it.crop)) },
             output = staged,
             pageSize = job.pageSize ?: PageSizeOption.FIT,
             margin = job.margin ?: MarginOption.NONE,

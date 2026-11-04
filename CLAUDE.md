@@ -2,8 +2,8 @@
 
 ## What it is
 Free mobile app, Android first. Converts PDF to JPG/PNG and JPG/PNG to PDF.
-Convert only: no editing of content, no OCR, no Word conversion.
-All conversion runs on the phone. Structure reference: Clear Scan by Indy Mobile (import many files, PDF import with DPI setting, PDF export without watermark, folders, trash, sorting, Drive sync). Skip its in-app camera scanning, filters, markup, ads and subscriptions.
+Convert only: no OCR, no Word conversion, no filters or markup. Page layout fixes are allowed: crop (4 corners, straightened) and 90° rotation.
+All conversion runs on the phone. Structure reference: Clear Scan by Indy Mobile (import many files, PDF import with DPI setting, PDF export without watermark, folders, trash, sorting, Drive sync). Skip its auto edge detection, filters, markup, ads and subscriptions.
 
 Pro tier (paid):
 1. Auto-upload every file to a Google Drive folder the user designates.
@@ -23,8 +23,8 @@ Pro tier (paid):
 - PC version: deferred until after mobile, not dropped. Not in the current phases. Earlier plan was Tauri or Electron with pdf.js and pdf-lib.
 - minSdk 29 (Android 10). Older, low-spec phones are out.
 - Inputs: PDF, JPG, PNG, plus WebP and HEIC/HEIF where the phone decodes them. Outputs: JPG, PNG, PDF only.
-- Rotating a page 90° before making a PDF is allowed (layout, not content editing).
-- Camera: a "Take photo" button opens the phone's own camera app. No in-app camera or scanner.
+- Camera: the app's own camera screen (CameraX 1.6.2), with Single and Batch modes. Chosen so phone camera apps cannot stamp their watermark or time mark on scans. Replaces the earlier "use the phone's camera app" decision.
+- Crop and rotate: an Adjust screen with 4 draggable corners; the app straightens the area (Matrix.setPolyToPoly) and rotates by 90°. Stored per page (pages.crop, DB version 2). Adjust opens automatically after camera photos; tap any page to adjust. No auto edge detection.
 - Owner: one bound owner device per org. If it is lost, the owner proves identity with a TOTP code from an authenticator app (e.g. Google Authenticator) set up at enrollment, then binds a new device. Design the details in phase 5.
 - Build (phase 2): AGP 9.5 with built-in Kotlin, Kotlin 2.4.21, KSP 2.3.13, Gradle 9.8.2, compileSdk 37, targetSdk 36. Package name com.gaiascanner.app is a placeholder; make it final before the first Play upload.
 - The cloud sandbox cannot reach dl.google.com or downloads.gradle.org, so the Android build runs only in GitHub Actions (.github/workflows/android.yml). scripts/core-tests-local.sh runs the plain-Kotlin tests locally.
@@ -43,7 +43,7 @@ Pro tier (paid):
 - Under drive.file, can the Android app see files the backend created, if both use OAuth clients in the same Google Cloud project?
 - Licenses of any PDF library chosen. Read its LICENSE file.
 - The docs advise rendering untrusted PDFs in an isolated process. Not built yet.
-- Real phones: camera app photos at full size, 50 real photos to PDF, output opening in Chrome, Drive and Acrobat.
+- Real phones (CI emulators have no camera): in-app camera photos have no watermark or time mark, full resolution, correct orientation; batch mode speed; 50 real photos to PDF; output opening in Chrome, Drive and Acrobat.
 
 ## Tested on CI emulators, API 29 and 36 (phase 2, synthetic files)
 - PdfRenderer leaves blank areas transparent, so pages must be painted white first (done).
@@ -58,7 +58,7 @@ Pro tier (paid):
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.
 - Job: id, type, inputs, options, status, progress, error, times.
 - Document: id, name, kind, page count, size, local path, folder id, Drive file id, created, modified, trashed at.
-- Folder: id, name, parent id. Page: id, document id, order, image path, width, height, rotation (0, 90, 180, 270).
+- Folder: id, name, parent id. Page: id, document id, order, image path, width, height, rotation (0, 90, 180, 270), crop (4 corners, optional).
 - SyncRecord: document id, Drive file id, last synced, status.
 - Pro: Organization (plan, expiry, device limit 20, owner, Drive folder), Device (org, name, role, enrolled, last seen, status), Upload (org, device, name, size, hash, Drive file id, status), AuditLog, Invite, Subscription.
 

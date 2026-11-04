@@ -2,6 +2,4 @@
 <paths>
     <!-- Library files, shared through the share sheet. -->
     <files-path name="library" path="library/" />
-    <!-- Photos taken with the camera app land here before import. -->
-    <cache-path name="camera" path="camera/" />
 </paths>
