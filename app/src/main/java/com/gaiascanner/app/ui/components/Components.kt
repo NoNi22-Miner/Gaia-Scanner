@@ -30,15 +30,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.gaiascanner.app.appContainer
+import com.gaiascanner.app.core.PageEdit
 
 /** Thumbnail of an image file, or of the first page of a PDF when [isPdf]. */
 @Composable
-fun Thumbnail(path: String, isPdf: Boolean, rotation: Int, size: Dp, modifier: Modifier = Modifier, crop: String? = null) {
+fun Thumbnail(path: String, isPdf: Boolean, size: Dp, modifier: Modifier = Modifier, edit: PageEdit = PageEdit()) {
     val context = LocalContext.current
     val px = with(androidx.compose.ui.platform.LocalDensity.current) { size.roundToPx() }
-    val bitmap by produceState<android.graphics.Bitmap?>(null, path, rotation, crop, px) {
+    val bitmap by produceState<android.graphics.Bitmap?>(null, path, edit.key, px) {
         val cache = context.appContainer.thumbnails
-        value = if (isPdf) cache.pdf(path, px) else cache.image(path, rotation, px, crop)
+        value = if (isPdf) cache.pdf(path, px) else cache.image(path, edit, px)
     }
     Box(
         modifier = modifier

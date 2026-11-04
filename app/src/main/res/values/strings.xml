@@ -47,14 +47,39 @@
         <item quantity="other">%d photos you took will be lost.</item>
     </plurals>
 
-    <!-- Adjust -->
-    <string name="adjust_title">Adjust page %1$d of %2$d</string>
-    <string name="adjust_hint">Drag the four corners onto the edges of the page. The app straightens it.</string>
-    <string name="action_adjust">Crop and rotate</string>
-    <string name="tap_to_adjust">Tap to crop or rotate</string>
-    <string name="action_reset">Reset</string>
-    <string name="action_next">Next</string>
-    <string name="action_skip">Skip</string>
+    <!-- Page editor -->
+    <string name="page_of">%1$d / %2$d</string>
+    <string name="action_more">More options</string>
+    <string name="action_process_all">Process all</string>
+    <string name="action_discard_page">Discard</string>
+    <string name="action_discard_all">Discard all</string>
+    <plurals name="discard_all_body">
+        <item quantity="one">%d page in this run will be removed.</item>
+        <item quantity="other">%d pages in this run will be removed.</item>
+    </plurals>
+    <string name="action_auto">Auto</string>
+    <string name="action_full_frame">Full</string>
+    <string name="action_rotate_left">Rotate left</string>
+    <string name="action_rotate_right">Rotate right</string>
+    <string name="action_crop">Crop</string>
+    <string name="action_erase">Erase</string>
+    <string name="action_tone">Adjust</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_edit_page">Edit page</string>
+    <string name="tap_to_edit">Tap to edit</string>
+    <string name="edit_hint_crop">Drag the corners or sides onto the edges of the page. The app straightens it.</string>
+    <string name="edit_hint_erase">Brush over marks to remove them.</string>
+    <string name="no_edges_found">No page edges found. Drag the corners by hand.</string>
+    <string name="filter_original">Original</string>
+    <string name="filter_photo">Photo</string>
+    <string name="filter_clear">Clear</string>
+    <string name="filter_docs">Docs</string>
+    <string name="filter_color">Color</string>
+    <string name="tone_brightness">Brightness: %1$d</string>
+    <string name="tone_contrast">Contrast: %1$d</string>
+    <string name="erase_white">White</string>
+    <string name="erase_fill">Smart fill</string>
+    <string name="erase_size">Brush size</string>
 
     <!-- Document -->
     <string name="action_back">Back</string>
@@ -70,7 +95,6 @@
     <string name="action_view_jobs">View</string>
     <string name="action_move_up">Move up</string>
     <string name="action_move_down">Move down</string>
-    <string name="action_rotate">Rotate 90°</string>
     <string name="action_remove_page">Remove page</string>
     <string name="delete_title">Delete this file?</string>
     <string name="delete_body">“%1$s” and its pages will be removed from the app. Copies you saved elsewhere are not affected.</string>

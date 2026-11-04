@@ -9,7 +9,12 @@ import com.gaiascanner.app.core.ImageFormat
 import com.gaiascanner.app.core.JobStatus
 import com.gaiascanner.app.core.JobType
 import com.gaiascanner.app.core.MarginOption
+import com.gaiascanner.app.core.EraseStrokes
+import com.gaiascanner.app.core.PageEdit
+import com.gaiascanner.app.core.PageFilter
 import com.gaiascanner.app.core.PageSizeOption
+import com.gaiascanner.app.core.Quad
+import com.gaiascanner.app.core.Tone
 
 /**
  * A library item. For a PDF, [localPath] is the PDF file. For an image set,
@@ -59,6 +64,21 @@ data class PageEntity(
     val rotation: Int = 0,
     /** Perspective crop as Quad.serialize() text, or null for the whole image. Added in DB version 2. */
     val crop: String? = null,
+    /** Enhance settings, added in DB version 3. Null means the default. */
+    val filter: PageFilter? = null,
+    val brightness: Int? = null,
+    val contrast: Int? = null,
+    /** Eraser strokes as EraseStrokes.serialize() text, in page coordinates after crop and rotation. */
+    val erase: String? = null,
+)
+
+/** The page's edits as one value for rendering. */
+fun PageEntity.edit(): PageEdit = PageEdit(
+    crop = Quad.parse(crop),
+    rotation = rotation,
+    strokes = EraseStrokes.parse(erase),
+    tone = Tone(brightness ?: 0, contrast ?: 0),
+    filter = filter ?: PageFilter.ORIGINAL,
 )
 
 @Entity(tableName = "jobs")

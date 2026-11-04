@@ -80,6 +80,7 @@ import com.gaiascanner.app.core.PageSizeOption
 import com.gaiascanner.app.data.AppSettings
 import com.gaiascanner.app.data.db.DocumentEntity
 import com.gaiascanner.app.data.db.PageEntity
+import com.gaiascanner.app.data.db.edit
 import com.gaiascanner.app.ui.components.ChoiceRow
 import com.gaiascanner.app.ui.components.Thumbnail
 import com.gaiascanner.app.ui.components.rememberNotificationPermissionRequest
@@ -251,7 +252,7 @@ private fun PdfContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (!doc.locked) Thumbnail(doc.localPath, isPdf = true, rotation = 0, size = 220.dp)
+        if (!doc.locked) Thumbnail(doc.localPath, isPdf = true, size = 220.dp)
         val created = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(doc.createdAt))
         if (doc.locked) {
             Card(Modifier.fillMaxWidth()) {
@@ -368,17 +369,17 @@ private fun PageRow(
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable(onClickLabel = stringResource(R.string.action_adjust), onClick = onAdjust)
+            .clickable(onClickLabel = stringResource(R.string.action_edit_page), onClick = onAdjust)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Thumbnail(page.imagePath, isPdf = false, rotation = page.rotation, size = 72.dp, crop = page.crop)
+        Thumbnail(page.imagePath, isPdf = false, size = 72.dp, edit = page.edit())
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.page_number, number), style = MaterialTheme.typography.titleSmall)
             val (w, h) = CropRotation.finalSize(page.width, page.height, Quad.parse(page.crop), page.rotation)
             Text("$w × $h", style = MaterialTheme.typography.bodySmall)
-            Text(stringResource(R.string.tap_to_adjust), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.tap_to_edit), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
         }
         IconButton(onClick = onUp, enabled = !isFirst) {
             Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.action_move_up))

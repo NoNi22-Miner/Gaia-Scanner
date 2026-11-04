@@ -52,6 +52,8 @@ import com.gaiascanner.app.R
 import com.gaiascanner.app.appContainer
 import com.gaiascanner.app.core.DocumentKind
 import com.gaiascanner.app.data.db.DocumentEntity
+import com.gaiascanner.app.data.db.PageEntity
+import com.gaiascanner.app.data.db.edit
 import com.gaiascanner.app.ui.components.Thumbnail
 import com.gaiascanner.app.ui.formatSize
 
@@ -191,11 +193,11 @@ private fun DocumentRow(doc: DocumentEntity, onClick: () -> Unit) {
 private fun DocumentThumbnail(doc: DocumentEntity) {
     val container = LocalContext.current.appContainer
     if (doc.kind == DocumentKind.PDF) {
-        if (!doc.locked) Thumbnail(doc.localPath, isPdf = true, rotation = 0, size = 56.dp)
+        if (!doc.locked) Thumbnail(doc.localPath, isPdf = true, size = 56.dp)
     } else {
-        val firstPage by androidx.compose.runtime.produceState<Pair<String, Int>?>(null, doc.id, doc.modifiedAt) {
-            value = container.library.getPages(doc.id).firstOrNull()?.let { it.imagePath to it.rotation }
+        val firstPage by androidx.compose.runtime.produceState<PageEntity?>(null, doc.id, doc.modifiedAt) {
+            value = container.library.getPages(doc.id).firstOrNull()
         }
-        firstPage?.let { (path, rotation) -> Thumbnail(path, isPdf = false, rotation = rotation, size = 56.dp) }
+        firstPage?.let { Thumbnail(it.imagePath, isPdf = false, size = 56.dp, edit = it.edit()) }
     }
 }

@@ -8,9 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.gaiascanner.app.data.db.parseIds
-import com.gaiascanner.app.ui.adjust.AdjustScreen
 import com.gaiascanner.app.ui.camera.CameraScreen
 import com.gaiascanner.app.ui.document.DocumentScreen
+import com.gaiascanner.app.ui.editor.PageEditorScreen
+import com.gaiascanner.app.ui.editor.PageEditorViewModel
 import com.gaiascanner.app.ui.jobs.JobsScreen
 import com.gaiascanner.app.ui.library.LibraryScreen
 import com.gaiascanner.app.ui.settings.SettingsScreen
@@ -23,16 +24,21 @@ private object Routes {
 
     /** doc = -1 starts a new image document. */
     const val CAMERA = "camera?doc={doc}"
-    const val ADJUST = "adjust/{doc}?pages={pages}"
+    const val EDITOR = "edit/{doc}?pages={pages}&mode={mode}&auto={auto}"
 
     fun document(id: Long) = "document/$id"
     fun camera(documentId: Long?) = "camera?doc=${documentId ?: -1}"
-    fun adjust(documentId: Long, pageIds: List<Long>) = "adjust/$documentId?pages=${pageIds.joinToString(",")}"
+    fun editor(documentId: Long, pageIds: List<Long>, mode: PageEditorViewModel.Mode, auto: Boolean) =
+        "edit/$documentId?pages=${pageIds.joinToString(",")}&mode=${mode.name}&auto=$auto"
 }
 
-/** After the camera or Adjust: show the document, with the library under it. */
-private fun NavHostController.showDocument(id: Long) {
-    navigate(Routes.document(id)) { popUpTo(Routes.LIBRARY) }
+/** After the camera or editor: show the document (or the library if it was deleted). */
+private fun NavHostController.showDocument(id: Long, deleted: Boolean = false) {
+    if (deleted) {
+        navigate(Routes.LIBRARY) { popUpTo(Routes.LIBRARY) { inclusive = true } }
+    } else {
+        navigate(Routes.document(id)) { popUpTo(Routes.LIBRARY) }
+    }
 }
 
 @Composable
@@ -54,7 +60,7 @@ fun GaiaNavHost() {
                 onBack = { nav.popBackStack() },
                 onOpenJobs = { nav.navigate(Routes.JOBS) },
                 onOpenCamera = { nav.navigate(Routes.camera(it)) },
-                onAdjustPage = { pageId -> nav.navigate(Routes.adjust(id, listOf(pageId))) },
+                onAdjustPage = { pageId -> nav.navigate(Routes.editor(id, listOf(pageId), PageEditorViewModel.Mode.ENHANCE, auto = false)) },
             )
         }
         composable(
@@ -64,27 +70,39 @@ fun GaiaNavHost() {
             val doc = entry.arguments?.getLong("doc")?.takeIf { it >= 0 }
             CameraScreen(
                 documentId = doc,
-                // Photos open in Adjust right away, one page after another.
+                // Photos open in the editor right away: crop first (corners found automatically), then enhance.
                 onSaved = { docId, pageIds ->
                     if (pageIds.isEmpty()) {
                         nav.showDocument(docId)
                     } else {
-                        nav.navigate(Routes.adjust(docId, pageIds)) { popUpTo(Routes.CAMERA) { inclusive = true } }
+                        nav.navigate(Routes.editor(docId, pageIds, PageEditorViewModel.Mode.CROP, auto = true)) {
+                            popUpTo(Routes.CAMERA) { inclusive = true }
+                        }
                     }
                 },
                 onClose = { nav.popBackStack() },
             )
         }
         composable(
-            Routes.ADJUST,
+            Routes.EDITOR,
             arguments = listOf(
                 navArgument("doc") { type = NavType.LongType },
                 navArgument("pages") { type = NavType.StringType; defaultValue = "" },
+                navArgument("mode") { type = NavType.StringType; defaultValue = PageEditorViewModel.Mode.ENHANCE.name },
+                navArgument("auto") { type = NavType.BoolType; defaultValue = false },
             ),
         ) { entry ->
             val doc = entry.arguments?.getLong("doc") ?: -1L
             val pages = parseIds(entry.arguments?.getString("pages"))
-            AdjustScreen(pageIds = pages, onFinished = { nav.showDocument(doc) })
+            val mode = PageEditorViewModel.Mode.entries.firstOrNull { it.name == entry.arguments?.getString("mode") }
+                ?: PageEditorViewModel.Mode.ENHANCE
+            PageEditorScreen(
+                documentId = doc,
+                pageIds = pages,
+                startMode = mode,
+                autoDetect = entry.arguments?.getBoolean("auto") ?: false,
+                onFinished = { deleted -> nav.showDocument(doc, deleted) },
+            )
         }
         composable(Routes.JOBS) {
             JobsScreen(

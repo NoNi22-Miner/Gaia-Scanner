@@ -6,8 +6,10 @@ import androidx.annotation.RequiresApi
 import androidx.room.withTransaction
 import com.gaiascanner.app.core.DocumentKind
 import com.gaiascanner.app.core.FailureReason
+import com.gaiascanner.app.core.EraseStrokes
 import com.gaiascanner.app.core.FileNames
-import com.gaiascanner.app.core.Quad
+import com.gaiascanner.app.core.PageEdit
+import com.gaiascanner.app.core.PageFilter
 import com.gaiascanner.app.core.Rotation
 import com.gaiascanner.app.data.db.AppDatabase
 import com.gaiascanner.app.data.db.DocumentEntity
@@ -116,12 +118,55 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
         result
     }
 
-    /** Saves the crop and rotation chosen on the Adjust screen. A full-frame crop is stored as none. */
-    suspend fun setPageAdjust(pageId: Long, crop: Quad?, rotation: Int) {
+    /**
+     * Saves everything set in the page editor. A full-frame crop is stored as none.
+     * Eraser strokes are dropped if the crop or rotation changed, because they are
+     * placed in page coordinates after crop and rotation.
+     */
+    suspend fun setPageEdit(pageId: Long, edit: PageEdit) {
         val page = db.pages().get(pageId) ?: return
-        val stored = crop?.takeUnless { it.isFullFrame }?.serialize()
-        db.pages().update(page.copy(crop = stored, rotation = Rotation.normalize(rotation)))
+        val crop = edit.crop?.takeUnless { it.isFullFrame }?.serialize()
+        val rotation = Rotation.normalize(edit.rotation)
+        val geometryChanged = crop != page.crop || rotation != page.rotation
+        val strokes = if (geometryChanged && page.erase != null && edit.strokes == EraseStrokes.parse(page.erase)) {
+            emptyList()
+        } else {
+            edit.strokes
+        }
+        db.pages().update(
+            page.copy(
+                crop = crop,
+                rotation = rotation,
+                filter = edit.filter.takeUnless { it == PageFilter.ORIGINAL },
+                brightness = edit.tone.brightness.takeUnless { it == 0 },
+                contrast = edit.tone.contrast.takeUnless { it == 0 },
+                erase = EraseStrokes.serialize(strokes),
+            ),
+        )
         touch(page.documentId)
+    }
+
+    /**
+     * Removes pages (Discard / Discard All in the editor). An image document left
+     * with no pages is deleted too. Returns true if the document was deleted.
+     */
+    suspend fun removePages(documentId: Long, pageIds: List<Long>): Boolean {
+        val removed = mutableListOf<String>()
+        db.withTransaction {
+            for (id in pageIds) {
+                val page = db.pages().get(id) ?: continue
+                if (page.documentId != documentId) continue
+                db.pages().delete(page)
+                removed += page.imagePath
+            }
+            refreshImageDocument(documentId)
+        }
+        withContext(Dispatchers.IO) { removed.forEach { File(it).delete() } }
+        if (db.pages().getForDocument(documentId).isEmpty()) {
+            deleteDocument(documentId)
+            return true
+        }
+        return false
     }
 
     private class ImageSource(val displayName: String, val mimeType: String?, val writeTo: (File) -> Unit)

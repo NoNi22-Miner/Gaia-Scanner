@@ -9,6 +9,7 @@ import com.gaiascanner.app.core.JpegPdfWriter
 import com.gaiascanner.app.core.MarginOption
 import com.gaiascanner.app.core.PageMath
 import com.gaiascanner.app.core.PageSizeOption
+import com.gaiascanner.app.core.PageEdit
 import com.gaiascanner.app.core.Quad
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -26,7 +27,9 @@ class ImagesToPdf(
     private val jpegQuality: Int = ConvertDefaults.JPEG_QUALITY,
 ) {
 
-    data class Input(val file: File, val userRotation: Int = 0, val crop: Quad? = null)
+    data class Input(val file: File, val edit: PageEdit = PageEdit()) {
+        constructor(file: File, userRotation: Int, crop: Quad? = null) : this(file, PageEdit(crop = crop, rotation = userRotation))
+    }
 
     suspend fun convert(
         inputs: List<Input>,
@@ -59,12 +62,12 @@ class ImagesToPdf(
         val info = ImageDecoding.readInfo(input.file) ?: throw ConvertException(
             if (input.file.exists()) FailureReason.UNSUPPORTED_FORMAT else FailureReason.MISSING_FILE,
         )
-        val (finalW, finalH) = ImageDecoding.finalSize(info, input.crop, input.userRotation)
+        val (finalW, finalH) = PageRenderer.finalSize(info, input.edit)
         val page = PageMath.pageSizeFor(finalW, finalH, pageSize)
         val box = PageMath.fitInside(PageMath.contentBox(page, margin), finalW, finalH)
         val (targetW, targetH) = PageMath.targetPixels(box.width, box.height, imageDpi, finalW, finalH)
 
-        val bitmap = onWhite(ImageDecoding.decodeFinal(input.file, info, input.crop, input.userRotation, targetW, targetH))
+        val bitmap = onWhite(PageRenderer.render(input.file, info, input.edit, targetW, targetH))
         val pixelW = bitmap.width
         val pixelH = bitmap.height
         val jpeg = try {

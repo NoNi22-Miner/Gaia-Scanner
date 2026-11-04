@@ -328,7 +328,7 @@ private fun BottomControls(vm: CameraViewModel, onShoot: () -> Unit, onDone: () 
         Box(Modifier.width(72.dp), contentAlignment = Alignment.CenterStart) {
             vm.captured.lastOrNull()?.let { last ->
                 Box {
-                    Thumbnail(last.path, isPdf = false, rotation = 0, size = 56.dp)
+                    Thumbnail(last.path, isPdf = false, size = 56.dp)
                     Text(
                         vm.captured.size.toString(),
                         color = Color.White,

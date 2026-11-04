@@ -3,13 +3,13 @@ package com.gaiascanner.app
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.LruCache
-import com.gaiascanner.app.core.Quad
+import com.gaiascanner.app.core.PageEdit
 import com.gaiascanner.app.data.Exporter
 import com.gaiascanner.app.data.FileStore
 import com.gaiascanner.app.data.LibraryRepository
 import com.gaiascanner.app.data.SettingsRepository
 import com.gaiascanner.app.data.db.AppDatabase
-import com.gaiascanner.app.engine.ImageDecoding
+import com.gaiascanner.app.engine.PageRenderer
 import com.gaiascanner.app.engine.PdfFiles
 import com.gaiascanner.app.work.ConversionRunner
 import com.gaiascanner.app.work.JobRepository
@@ -47,9 +47,10 @@ class ThumbnailCache {
         override fun sizeOf(key: String, value: Bitmap) = value.byteCount
     }
 
-    suspend fun image(path: String, rotation: Int, maxSide: Int, crop: String? = null): Bitmap? =
-        load("img|$path|$rotation|$crop|$maxSide|${File(path).lastModified()}") {
-            ImageDecoding.decodeThumbnail(File(path), maxSide, rotation, Quad.parse(crop))
+    /** An image page as it will look in the PDF (crop, rotation, eraser, tone, filter). */
+    suspend fun image(path: String, edit: PageEdit, maxSide: Int): Bitmap? =
+        load("img|$path|${edit.key}|$maxSide|${File(path).lastModified()}") {
+            PageRenderer.thumbnail(File(path), edit, maxSide)
         }
 
     suspend fun pdf(path: String, maxWidth: Int): Bitmap? =

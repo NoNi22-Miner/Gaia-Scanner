@@ -2,8 +2,8 @@
 
 ## What it is
 Free mobile app, Android first. Converts PDF to JPG/PNG and JPG/PNG to PDF.
-Convert only: no OCR, no Word conversion, no filters or markup. Page layout fixes are allowed: crop (4 corners, straightened) and 90° rotation.
-All conversion runs on the phone. Structure reference: Clear Scan by Indy Mobile (import many files, PDF import with DPI setting, PDF export without watermark, folders, trash, sorting, Drive sync). Skip its auto edge detection, filters, markup, ads and subscriptions.
+Scanner and converter: crop with auto edge detection, filters, brightness/contrast, eraser, optional text watermark. No OCR, no Word conversion, no ads.
+All processing runs on the phone. Structure reference: ClearScanner (Indy Mobile): its crop, enhance, PDF tools, library and side-menu functions were reviewed with the owner on 2026-11-04 and adopted (see Phases). Skip its ads.
 
 Pro tier (paid):
 1. Auto-upload every file to a Google Drive folder the user designates.
@@ -24,7 +24,10 @@ Pro tier (paid):
 - minSdk 29 (Android 10). Older, low-spec phones are out.
 - Inputs: PDF, JPG, PNG, plus WebP and HEIC/HEIF where the phone decodes them. Outputs: JPG, PNG, PDF only.
 - Camera: the app's own camera screen (CameraX 1.6.2), with Single and Batch modes. Chosen so phone camera apps cannot stamp their watermark or time mark on scans. Replaces the earlier "use the phone's camera app" decision.
-- Crop and rotate: an Adjust screen with 4 draggable corners; the app straightens the area (Matrix.setPolyToPoly) and rotates by 90°. Stored per page (pages.crop, DB version 2). Adjust opens automatically after camera photos; tap any page to adjust. No auto edge detection.
+- Crop and rotate: 4 draggable corners plus edge handles; the app straightens the area (Matrix.setPolyToPoly); rotate left/right; full-frame button. Stored per page (pages.crop). The editor opens automatically after camera photos; tap any page to edit.
+- Auto edge detection and the smart-fill eraser use OpenCV 4.14.0 (org.opencv:opencv on Maven Central, Apache 2.0; LICENSE read 2026-11-04). Native code per ABI: arm64-v8a 26 MB, armeabi-v7a 17 MB, x86_64 62 MB (uncompressed). Phone builds ship arm64-v8a and armeabi-v7a; CI emulator tests build x86_64 only (-Pgaia.abis). Release should be an App Bundle so each phone downloads one ABI.
+- Enhance, per page and non-destructive (applied when rendering): filters Original, Photo, Clear (whitened paper), Docs (black and white), Color; brightness and contrast; eraser with white brush and smart fill (OpenCV inpaint). Render order: crop, rotate, erase, brightness/contrast, filter.
+- Feature request / bug report email: placeholder until the owner sets it before release.
 - Owner: one bound owner device per org. If it is lost, the owner proves identity with a TOTP code from an authenticator app (e.g. Google Authenticator) set up at enrollment, then binds a new device. Design the details in phase 5.
 - Build (phase 2): AGP 9.5 with built-in Kotlin, Kotlin 2.4.21, KSP 2.3.13, Gradle 9.8.2, compileSdk 37, targetSdk 36. Package name com.gaiascanner.app is a placeholder; make it final before the first Play upload.
 - The cloud sandbox cannot reach dl.google.com or downloads.gradle.org, so the Android build runs only in GitHub Actions (.github/workflows/android.yml). scripts/core-tests-local.sh runs the plain-Kotlin tests locally.
@@ -63,12 +66,12 @@ Pro tier (paid):
 - Pro: Organization (plan, expiry, device limit 20, owner, Drive folder), Device (org, name, role, enrolled, last seen, status), Upload (org, device, name, size, hash, Drive file id, status), AuditLog, Invite, Subscription.
 
 ## Phases (one session per phase; clear the session between phases)
-1. Spec and stack decision. No code.
-2. Convert engine and local save (free v1).
-3. Library: folders, trash, sort.
-4. Google sign-in, Drive picker, upload. Test the unverified items first.
+1. Spec and stack decision. No code. (done)
+2. Convert engine and local save. (done) 2b: in-app camera, page editor: crop extras, auto edge detection, filters, brightness/contrast, eraser, Process All / Discard / Discard All.
+3. Library: folders, trash, sort, select many, list/grid view, gallery and camera buttons on the home screen, file dates, side menu (Settings, Trash, Tutorial, Feature request / bug report, About), new blank page, PDF tools: reduce file size, text watermark.
+4. Google sign-in, Drive picker, upload (Sync to Cloud), Backup / Restore. Test the unverified items first.
 5. Pro backend: devices, roles, upload queue, audit log.
-6. Subscription and release.
+6. Subscription and release: Pro Version page, "I love this app" (Play in-app review), store listing.
 
 ## Working rules
 - Plan first. Do not write code for a phase until its open decisions are answered.

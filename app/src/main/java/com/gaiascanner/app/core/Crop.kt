@@ -64,6 +64,19 @@ data class Quad(val tl: Point, val tr: Point, val br: Point, val bl: Point) {
         return max(1, w) to max(1, h)
     }
 
+    /**
+     * Moves the side from corner [edge] to the next corner by [dx], [dy]:
+     * fractions of the image as shown after the user's [rotation].
+     */
+    fun moveEdge(edge: Int, dx: Float, dy: Float, rotation: Int): Quad {
+        var q = this
+        for (i in listOf(edge, (edge + 1) % 4)) {
+            val shown = CropRotation.toDisplay(corners[i], rotation)
+            q = q.withCorner(i, CropRotation.toStored(Point(shown.x + dx, shown.y + dy).clamped(), rotation))
+        }
+        return q
+    }
+
     /** "x1,y1,x2,y2,x3,y3,x4,y4" for the database. */
     fun serialize(): String =
         corners.joinToString(",") { "${fmt(it.x)},${fmt(it.y)}" }

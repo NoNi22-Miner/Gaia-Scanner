@@ -5,6 +5,7 @@ ksp = "2.3.13"
 coroutines = "1.11.0"
 activity = "1.13.0"
 camera = "1.6.2"
+opencv = "4.14.0"
 compose = "1.12.1"
 composeMaterial3 = "1.4.0"
 composeIcons = "1.7.8"
@@ -34,6 +35,7 @@ androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camera" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camera" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camera" }
+opencv = { module = "org.opencv:opencv", version.ref = "opencv" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }

@@ -22,7 +22,7 @@ Labels used below:
 Auto-upload to a Drive folder, auto-create folders there, up to 20 devices, members can only add. See CLAUDE.md.
 
 ### Out of scope
-Automatic edge detection, filters, markup, OCR, Word, editing page content, merging or splitting PDFs, ads.
+OCR, Word, drawing or text markup on pages (other than the eraser and an optional text watermark), merging or splitting PDFs, ads.
 
 ## 2. Stack
 
@@ -133,6 +133,18 @@ Decided by the project owner after testing plans:
 - **Adjust screen:** drag 4 corners onto the page edges; the app straightens that area into a rectangle with Android's Matrix.setPolyToPoly. Rotate turns the page 90°. Reset, Next, Skip. Tapping a page in a document opens it too. The rotate button left the page list.
 - The crop is stored per page as 4 corner fractions of the upright image (pages.crop, database version 2 with a migration from version 1). Images to PDF applies crop, then rotation.
 - No automatic edge detection: that would need an image library or ML model and a license check.
+
+### 3.9 Page editor and Enhance (phase 2b, from the ClearScanner review on 2026-11-04)
+The owner reviewed ClearScanner's screens and adopted its crop, enhance, PDF-tool, library and menu functions. Phase 2b builds the page editor; the rest is placed in phases 3, 4 and 6 (see CLAUDE.md).
+- **Flow:** camera photos open the editor in Crop mode with corners found automatically; Done goes to Enhance mode; Done goes to the next page. Tapping a page in a document opens the editor in Enhance mode.
+- **Crop mode:** 4 corner handles and 4 edge handles (move a whole side), Auto (detect again), Full frame, rotate left, rotate right.
+- **Enhance mode:** filters Original, Photo, Clear, Docs, Color; brightness and contrast sliders; Crop, rotate left/right, Eraser.
+- **Eraser:** brush strokes in two modes: White (paint white) and Smart fill (OpenCV inpaint from the surroundings), brush size, undo. Strokes are stored in page coordinates after crop and rotation, so changing the crop or rotation clears them.
+- **Menu:** Process All (save this page, then give every remaining page auto corners and this page's filter, brightness and contrast), Discard (remove this page), Discard All (remove every page in this editing run).
+- **Non-destructive:** the original photo is kept. Each page stores crop, rotation, filter, brightness, contrast and eraser strokes (database version 3). Thumbnails and PDFs render them in this order: crop, rotate, erase, brightness/contrast, filter.
+- **Edge detection (OpenCV):** image scaled to 800 px; Canny at three thresholds plus Otsu, contours simplified to 4-point convex shapes of at least 15% of the image; each scored by edge strength along its outline times its area; the whole frame is ignored. Prototyped with opencv-python on synthetic scenes (wood, light-gray and dark backgrounds, uneven light: corners within 0.4%) and on the owner's ClearScanner screenshot.
+- **Filters (OpenCV):** Clear divides each colour channel by a blurred estimate of the paper (shadow removal), then deepens text; Docs is Clear in gray with an Otsu threshold (no speckles in the prototype, unlike adaptive threshold); Color is Clear with 1.5x saturation; Photo is a mild contrast and saturation boost.
+- [test] Edge detection on real photos (busy desks, white paper on white tables), filter speed at full page size on low-end phones, smart-fill quality on colored paper.
 
 ## 4. Library (phase 3)
 

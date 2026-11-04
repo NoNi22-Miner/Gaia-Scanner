@@ -16,6 +16,12 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // OpenCV ships large native libraries per CPU type. Phones use ARM; the CI
+        // emulator passes -Pgaia.abis=x86_64. A Play App Bundle sends one ABI per phone.
+        ndk {
+            abiFilters += (providers.gradleProperty("gaia.abis").orNull ?: "arm64-v8a,armeabi-v7a")
+                .split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        }
     }
 
     buildTypes {
@@ -66,6 +72,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation(libs.opencv)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

@@ -118,12 +118,36 @@ object ImageDecoding {
             max(1, (uw * scale).roundToInt()),
             max(1, (uh * scale).roundToInt()),
         )
-        // Cropped size before the user's rotation.
-        val (outW, outH) = Rotation.rotatedSize(targetWidth, targetHeight, userRotation)
+        try {
+            return warpAndRotate(upright, crop, userRotation, targetWidth, targetHeight)
+        } finally {
+            upright.recycle()
+        }
+    }
+
+    /**
+     * Crops and straightens [upright] with [crop] (null = whole image), then turns
+     * it by [userRotation], producing [targetWidth] x [targetHeight] (final size).
+     * Always returns a new bitmap; [upright] is not recycled.
+     */
+    fun warpAndRotate(upright: Bitmap, crop: Quad?, userRotation: Int, targetWidth: Int, targetHeight: Int): Bitmap {
+        val user = Rotation.normalize(userRotation)
+        // Size before the user's rotation.
+        val (outW, outH) = Rotation.rotatedSize(targetWidth, targetHeight, user)
+        if (crop == null || crop.isFullFrame) {
+            val m = Matrix()
+            m.postScale(outW / upright.width.toFloat(), outH / upright.height.toFloat())
+            if (user != 0) m.postRotate(user.toFloat())
+            val out = try {
+                Bitmap.createBitmap(upright, 0, 0, upright.width, upright.height, m, true)
+            } catch (e: OutOfMemoryError) {
+                throw ConvertException(FailureReason.TOO_LARGE, e)
+            }
+            return if (out === upright) upright.copy(Bitmap.Config.ARGB_8888, true) else out
+        }
         val warped = try {
             Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)
         } catch (e: OutOfMemoryError) {
-            upright.recycle()
             throw ConvertException(FailureReason.TOO_LARGE, e)
         }
         val sw = upright.width.toFloat()
@@ -134,13 +158,9 @@ object ImageDecoding {
         // Maps the four crop corners onto the corners of the output: a perspective straighten.
         if (!matrix.setPolyToPoly(src, 0, dst, 0, 4)) {
             warped.recycle()
-            upright.recycle()
             throw ConvertException(FailureReason.UNKNOWN)
         }
         Canvas(warped).drawBitmap(upright, matrix, Paint(Paint.FILTER_BITMAP_FLAG))
-        upright.recycle()
-
-        val user = Rotation.normalize(userRotation)
         if (user == 0) return warped
         val turned = try {
             Bitmap.createBitmap(warped, 0, 0, warped.width, warped.height, Matrix().apply { postRotate(user.toFloat()) }, true)

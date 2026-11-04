@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [DocumentEntity::class, PageEntity::class, JobEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -25,9 +25,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Version 3 adds the per-page Enhance settings (filter, brightness, contrast, eraser). */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE pages ADD COLUMN filter TEXT")
+                db.execSQL("ALTER TABLE pages ADD COLUMN brightness INTEGER")
+                db.execSQL("ALTER TABLE pages ADD COLUMN contrast INTEGER")
+                db.execSQL("ALTER TABLE pages ADD COLUMN erase TEXT")
+            }
+        }
+
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "gaia.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
     }
 }

@@ -9,7 +9,8 @@ adb logcat -c || true
 adb logcat -v brief -s GaiaMeasure:I > build/device-logs/measurements.txt &
 LOGCAT_PID=$!
 
-./gradlew --stacktrace connectedDebugAndroidTest
+# The emulator is x86_64; phone builds leave that ABI out (OpenCV is large).
+./gradlew --stacktrace connectedDebugAndroidTest -Pgaia.abis=x86_64
 STATUS=$?
 
 sleep 2
