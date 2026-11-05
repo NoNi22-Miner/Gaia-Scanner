@@ -211,9 +211,9 @@ Answered for phase 3 (owner, 2026-11-05):
 7. Text watermark: text, size, color, opacity, angle, single or tiled; default font. Applied only when saving a new PDF copy (with preview); the original stays clean. Never on by default.
 8. Reduce file size: presets High / Medium / Small; saves a smaller copy; shows the estimated new size first. The original is kept.
 9. New blank page: same size as the document; add at the end or after the current page.
-10. Side menu: Settings, Trash, Tutorial, Feature request / bug report, About. Tutorial = a few swipe screens (scan, edit, convert, library), shown at first launch and from the menu. Support email stays a placeholder.
+10. Side menu: Settings, Trash, Tutorial, Feature request / bug report, About. Tutorial = a few swipe screens (scan, edit, convert, library), shown at first launch and from the menu. Support: Telegram @ImRicYoung first, then email noxnixdev@gmail.com.
 11. Deleting a folder: the folder and its documents go to trash.
 
 Later phases: isolated process for PdfRenderer (decide before phase 4); free manual Drive upload and Backup/Restore format (phase 4); member upload path, rule 4 scope, owner recovery details and hosting (phase 5); Play billing for invoiced plans (phase 6).
 
-Phase 3 follow-up answers (owner, 2026-11-05): Tutorial = placeholder screens. About shows "Gaia Scanner". Watermark text is fully editable (ownership proof); initial values are a placeholder. Reduce presets: High 150 DPI JPEG 85, Medium 120 DPI 70, Small 90 DPI 55. Support contact: Telegram link button proposed; Play still needs a contact email (not confirmed).
+Phase 3 follow-up answers (owner, 2026-11-05): Tutorial = placeholder screens. About shows "Gaia Scanner". Watermark text is fully editable (ownership proof); initial values are a placeholder. Reduce presets: High 150 DPI JPEG 85, Medium 120 DPI 70, Small 90 DPI 55. Support contact (confirmed): Telegram @ImRicYoung (https://t.me/ImRicYoung) and email noxnixdev@gmail.com; the email is also the Play listing contact.

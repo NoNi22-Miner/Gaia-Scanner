@@ -27,7 +27,7 @@ Pro tier (paid):
 - Crop and rotate: 4 draggable corners plus edge handles; the app straightens the area (Matrix.setPolyToPoly); rotate left/right; full-frame button. Stored per page (pages.crop). The editor opens automatically after camera photos; tap any page to edit.
 - Auto edge detection and the smart-fill eraser use OpenCV 4.14.0 (org.opencv:opencv on Maven Central, Apache 2.0; LICENSE read 2026-11-04). Native code per ABI: arm64-v8a 26 MB, armeabi-v7a 17 MB, x86_64 62 MB (uncompressed). Phone builds ship arm64-v8a and armeabi-v7a; CI emulator tests build x86_64 only (-Pgaia.abis). Release should be an App Bundle so each phone downloads one ABI.
 - Enhance, per page and non-destructive (applied when rendering): filters Original, Photo, Clear (whitened paper), Docs (black and white), Color; brightness and contrast; eraser with white brush and smart fill (OpenCV inpaint). Render order: crop, rotate, erase, brightness/contrast, filter.
-- Feature request / bug report email: placeholder until the owner sets it before release.
+- Feature request / bug report contact (owner, 2026-11-05): email noxnixdev@gmail.com (also for the Play listing) and Telegram @ImRicYoung (https://t.me/ImRicYoung). The menu item offers Telegram first, then email. Kept in app/.../AppInfo.kt.
 - Owner: one bound owner device per org. If it is lost, the owner proves identity with a TOTP code from an authenticator app (e.g. Google Authenticator) set up at enrollment, then binds a new device. Design the details in phase 5.
 - Build (phase 2): AGP 9.5 with built-in Kotlin, Kotlin 2.4.21, KSP 2.3.13, Gradle 9.8.2, compileSdk 37, targetSdk 36. Package name com.gaiascanner.app is a placeholder; make it final before the first Play upload.
 - The cloud sandbox cannot reach dl.google.com or downloads.gradle.org, so the Android build runs only in GitHub Actions (.github/workflows/android.yml). scripts/core-tests-local.sh runs the plain-Kotlin tests locally.
@@ -37,7 +37,7 @@ Pro tier (paid):
 - Trash purges after 30 days. One sort choice for the whole library. Search by name included. List view by default, grid toggle.
 - Select many: share, trash, move to folder, convert. Home: Gallery and Camera buttons at the bottom; imports and New folder in the top-right menu. Deleting a folder sends its contents to trash.
 - Watermark and Reduce size always save a new PDF copy (original kept); reduce uses High/Medium/Small presets with estimated size shown. Blank page matches the document size, at the end or after the current page. Tutorial is swipe screens.
-- Owner answers, 2026-11-05: Tutorial gets placeholder swipe screens. App name on About: Gaia Scanner. Watermark text is free-form so the user can prove ownership (name, company, date); start values are a placeholder. Reduce presets: High 150 DPI q85, Medium 120 DPI q70, Small 90 DPI q55. Support contact: Telegram link proposed as a button, with email kept for the Play listing (owner to confirm).
+- Owner answers, 2026-11-05: Tutorial gets placeholder swipe screens. App name on About: Gaia Scanner. Watermark text is free-form so the user can prove ownership (name, company, date); start values are a placeholder. Reduce presets: High 150 DPI q85, Medium 120 DPI q70, Small 90 DPI q55. Support contact: Telegram and email (see Decisions made).
 - Work order: Library screen, select many, side menu and Trash, blank page, then PDF tools (reduce size, watermark). The owner may add PDF tools later.
 
 ## Open decisions: ask the user before coding
