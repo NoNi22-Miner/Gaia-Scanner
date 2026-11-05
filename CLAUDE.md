@@ -37,6 +37,8 @@ Pro tier (paid):
 - Trash purges after 30 days. One sort choice for the whole library. Search by name included. List view by default, grid toggle.
 - Select many: share, trash, move to folder, convert. Home: Gallery and Camera buttons at the bottom; imports and New folder in the top-right menu. Deleting a folder sends its contents to trash.
 - Watermark and Reduce size always save a new PDF copy (original kept); reduce uses High/Medium/Small presets with estimated size shown. Blank page matches the document size, at the end or after the current page. Tutorial is swipe screens.
+- Owner answers, 2026-11-05: Tutorial gets placeholder swipe screens. App name on About: Gaia Scanner. Watermark text is free-form so the user can prove ownership (name, company, date); start values are a placeholder. Reduce presets: High 150 DPI q85, Medium 120 DPI q70, Small 90 DPI q55. Support contact: Telegram link proposed as a button, with email kept for the Play listing (owner to confirm).
+- Work order: Library screen, select many, side menu and Trash, blank page, then PDF tools (reduce size, watermark). The owner may add PDF tools later.
 
 ## Open decisions: ask the user before coding
 - Full list per phase: docs/SPEC.md section 8. Spec: docs/SPEC.md.

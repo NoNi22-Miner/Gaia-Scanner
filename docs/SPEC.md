@@ -215,3 +215,5 @@ Answered for phase 3 (owner, 2026-11-05):
 11. Deleting a folder: the folder and its documents go to trash.
 
 Later phases: isolated process for PdfRenderer (decide before phase 4); free manual Drive upload and Backup/Restore format (phase 4); member upload path, rule 4 scope, owner recovery details and hosting (phase 5); Play billing for invoiced plans (phase 6).
+
+Phase 3 follow-up answers (owner, 2026-11-05): Tutorial = placeholder screens. About shows "Gaia Scanner". Watermark text is fully editable (ownership proof); initial values are a placeholder. Reduce presets: High 150 DPI JPEG 85, Medium 120 DPI 70, Small 90 DPI 55. Support contact: Telegram link button proposed; Play still needs a contact email (not confirmed).
