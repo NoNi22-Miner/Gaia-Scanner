@@ -154,6 +154,19 @@ The owner reviewed ClearScanner's screens and adopted its crop, enhance, PDF-too
 - Search by name [proposal].
 - Document detail: page thumbnails, info (pages, size, dates), and actions: convert, save, share, move, rename, trash.
 
+### 4.1 Phase 3 as built (2026-11-05)
+- Database version 4 adds a `folders` table (name, parent, created, modified, trashed at); migration 3 to 4 with a device test. Documents already had folderId and trashedAt.
+- Home: side menu (Settings, Trash, Tutorial, Feature request / bug report, About); top bar Search, Sort (also list/grid), Jobs, and a menu with Import PDFs, Image files, New folder; bottom Gallery and Camera. Folder path under the top bar; Back goes up a folder.
+- Sort: name (natural order: "Scan 2" before "Scan 10"), date created, date modified, size; ties by name. Folders sort with the same rule (size 0). Default: date modified, newest first.
+- Search: whole library, every word of the query must appear in the name.
+- New imports and camera documents go into the open folder. Conversion results go into the input document's folder.
+- Trash: trashing a folder trashes its subfolders and documents with one timestamp; restoring the folder brings back exactly those. A restored item whose folder is gone or trashed goes to the root. Purge of items over 30 days runs at app start. Document Delete now moves to trash.
+- Select many: long press. Share, Move to trash, Select all, Move to folder, Convert (PDFs to images, then image sets to PDF; locked and empty files skipped).
+- New blank page (image documents only): white JPEG shaped like the page it follows, long side 1754 px. PDFs cannot get a blank page: the app cannot edit existing PDFs.
+- Reduce file size and watermark make a new PDF next to the original. Every page is re-rendered and stored as JPEG, so text in the copy can no longer be selected (the screen says so). Watermark on an image document uses the Settings page size and margins. The last watermark style is remembered. Both tools run while their screen is open; leaving cancels.
+- Tutorial: 4 swipe screens with placeholder text, opened once at first launch and from the menu.
+- [test] On real phones: reduce and watermark speed on long PDFs, the tutorial and drawer on small screens.
+
 Screens:
 1. Library (home): folder path, list or grid, sort menu, add button (Import PDFs / Import images / Take photo).
 2. Document detail.

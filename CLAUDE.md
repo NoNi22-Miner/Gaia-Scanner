@@ -39,6 +39,7 @@ Pro tier (paid):
 - Watermark and Reduce size always save a new PDF copy (original kept); reduce uses High/Medium/Small presets with estimated size shown. Blank page matches the document size, at the end or after the current page. Tutorial is swipe screens.
 - Owner answers, 2026-11-05: Tutorial gets placeholder swipe screens. App name on About: Gaia Scanner. Watermark text is free-form so the user can prove ownership (name, company, date); start values are a placeholder. Reduce presets: High 150 DPI q85, Medium 120 DPI q70, Small 90 DPI q55. Support contact: Telegram and email (see Decisions made).
 - Work order: Library screen, select many, side menu and Trash, blank page, then PDF tools (reduce size, watermark). The owner may add PDF tools later.
+- Built in phase 3 (see SPEC 4.1): Room version 4 (folders table). Reduce size and watermark re-render pages as JPEG, so text in the copy is not selectable; the app cannot edit existing PDFs in place.
 
 ## Open decisions: ask the user before coding
 - Full list per phase: docs/SPEC.md section 8. Spec: docs/SPEC.md.
@@ -71,7 +72,7 @@ Pro tier (paid):
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.
 - Job: id, type, inputs, options, status, progress, error, times.
 - Document: id, name, kind, page count, size, local path, folder id, Drive file id, created, modified, trashed at.
-- Folder: id, name, parent id. Page: id, document id, order, image path, width, height, rotation (0, 90, 180, 270), crop (4 corners, optional).
+- Folder (DB v4): id, name, parent id, created, modified, trashed at. Page: id, document id, order, image path, width, height, rotation (0, 90, 180, 270), crop (4 corners, optional).
 - SyncRecord: document id, Drive file id, last synced, status.
 - Pro: Organization (plan, expiry, device limit 20, owner, Drive folder), Device (org, name, role, enrolled, last seen, status), Upload (org, device, name, size, hash, Drive file id, status), AuditLog, Invite, Subscription.
 
