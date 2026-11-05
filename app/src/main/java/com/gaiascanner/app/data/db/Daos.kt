@@ -13,6 +13,30 @@ interface DocumentDao {
     @Query("SELECT * FROM documents WHERE trashedAt IS NULL ORDER BY modifiedAt DESC")
     fun observeAll(): Flow<List<DocumentEntity>>
 
+    @Query("SELECT * FROM documents WHERE trashedAt IS NOT NULL ORDER BY trashedAt DESC")
+    fun observeTrashed(): Flow<List<DocumentEntity>>
+
+    @Query("SELECT * FROM documents WHERE trashedAt IS NOT NULL AND trashedAt < :before")
+    suspend fun trashedBefore(before: Long): List<DocumentEntity>
+
+    @Query("SELECT * FROM documents WHERE trashedAt IS NOT NULL")
+    suspend fun allTrashed(): List<DocumentEntity>
+
+    @Query("UPDATE documents SET trashedAt = :now WHERE id IN (:ids) AND trashedAt IS NULL")
+    suspend fun trash(ids: List<Long>, now: Long)
+
+    @Query("UPDATE documents SET trashedAt = NULL, folderId = :folderId WHERE id IN (:ids)")
+    suspend fun restore(ids: List<Long>, folderId: Long?)
+
+    @Query("UPDATE documents SET folderId = :folderId, modifiedAt = :now WHERE id IN (:ids) AND trashedAt IS NULL")
+    suspend fun moveTo(ids: List<Long>, folderId: Long?, now: Long)
+
+    @Query("UPDATE documents SET trashedAt = :now WHERE folderId IN (:folderIds) AND trashedAt IS NULL")
+    suspend fun trashInFolders(folderIds: List<Long>, now: Long)
+
+    @Query("UPDATE documents SET trashedAt = NULL WHERE folderId IN (:folderIds) AND trashedAt = :stamp")
+    suspend fun restoreInFolders(folderIds: List<Long>, stamp: Long)
+
     @Query("SELECT * FROM documents WHERE id = :id")
     fun observe(id: Long): Flow<DocumentEntity?>
 
@@ -27,6 +51,36 @@ interface DocumentDao {
 
     @Delete
     suspend fun delete(document: DocumentEntity)
+}
+
+@Dao
+interface FolderDao {
+    @Query("SELECT * FROM folders WHERE trashedAt IS NULL ORDER BY name COLLATE NOCASE")
+    fun observeActive(): Flow<List<FolderEntity>>
+
+    @Query("SELECT * FROM folders WHERE trashedAt IS NOT NULL ORDER BY trashedAt DESC")
+    fun observeTrashed(): Flow<List<FolderEntity>>
+
+    @Query("SELECT * FROM folders")
+    suspend fun all(): List<FolderEntity>
+
+    @Query("SELECT * FROM folders WHERE id = :id")
+    suspend fun get(id: Long): FolderEntity?
+
+    @Insert
+    suspend fun insert(folder: FolderEntity): Long
+
+    @Update
+    suspend fun update(folder: FolderEntity)
+
+    @Query("UPDATE folders SET trashedAt = :now WHERE id IN (:ids) AND trashedAt IS NULL")
+    suspend fun trash(ids: List<Long>, now: Long)
+
+    @Query("UPDATE folders SET trashedAt = NULL WHERE id IN (:ids) AND trashedAt = :stamp")
+    suspend fun restore(ids: List<Long>, stamp: Long)
+
+    @Query("DELETE FROM folders WHERE id IN (:ids)")
+    suspend fun delete(ids: List<Long>)
 }
 
 @Dao

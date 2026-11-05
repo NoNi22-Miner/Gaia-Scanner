@@ -8,12 +8,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [DocumentEntity::class, PageEntity::class, JobEntity::class],
-    version = 3,
+    entities = [DocumentEntity::class, FolderEntity::class, PageEntity::class, JobEntity::class],
+    version = 4,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun documents(): DocumentDao
+    abstract fun folders(): FolderDao
     abstract fun pages(): PageDao
     abstract fun jobs(): JobDao
 
@@ -35,9 +36,22 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Version 4 adds the folders table. Documents already had folderId and trashedAt. */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `folders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`name` TEXT NOT NULL, `parentId` INTEGER, `createdAt` INTEGER NOT NULL, " +
+                        "`modifiedAt` INTEGER NOT NULL, `trashedAt` INTEGER)",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_folders_parentId` ON `folders` (`parentId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_folders_trashedAt` ON `folders` (`trashedAt`)")
+            }
+        }
+
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "gaia.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
     }
 }

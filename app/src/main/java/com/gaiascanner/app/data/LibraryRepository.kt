@@ -13,6 +13,7 @@ import com.gaiascanner.app.core.PageFilter
 import com.gaiascanner.app.core.Rotation
 import com.gaiascanner.app.data.db.AppDatabase
 import com.gaiascanner.app.data.db.DocumentEntity
+import com.gaiascanner.app.data.db.FolderEntity
 import com.gaiascanner.app.data.db.PageEntity
 import com.gaiascanner.app.engine.ConvertException
 import com.gaiascanner.app.engine.Failures
@@ -24,6 +25,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class LibraryRepository(private val db: AppDatabase, private val files: FileStore) {
+    companion object {
+        const val THIRTY_DAYS_MS = 30L * 24 * 60 * 60 * 1000
+    }
+
 
     /** A file that failed to import, with its name and the reason. */
     data class ImportFailure(val name: String, val reason: FailureReason)
@@ -274,7 +279,99 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
         withContext(Dispatchers.IO) { File(page.imagePath).delete() }
     }
 
-    /** Deletes the document and its files. Trash replaces this in phase 3. */
+    val folders: Flow<List<FolderEntity>> = db.folders().observeActive()
+    val trashedDocuments: Flow<List<DocumentEntity>> = db.documents().observeTrashed()
+    val trashedFolders: Flow<List<FolderEntity>> = db.folders().observeTrashed()
+
+    suspend fun createFolder(name: String, parentId: Long?): Long {
+        val now = System.currentTimeMillis()
+        return db.folders().insert(FolderEntity(name = name.trim(), parentId = parentId, createdAt = now, modifiedAt = now))
+    }
+
+    suspend fun renameFolder(id: Long, name: String) {
+        val f = db.folders().get(id) ?: return
+        db.folders().update(f.copy(name = name.trim(), modifiedAt = System.currentTimeMillis()))
+    }
+
+    /** Moves documents to a folder (null = root). Trashed documents are left alone. */
+    suspend fun moveDocuments(ids: List<Long>, folderId: Long?) {
+        if (ids.isNotEmpty()) db.documents().moveTo(ids, folderId, System.currentTimeMillis())
+    }
+
+    /** Moves a folder under another folder. Refuses a move into itself or its own subtree. */
+    suspend fun moveFolder(id: Long, newParentId: Long?): Boolean {
+        val all = db.folders().all()
+        if (newParentId != null && newParentId in subtreeIds(all, id)) return false
+        val f = all.firstOrNull { it.id == id } ?: return false
+        db.folders().update(f.copy(parentId = newParentId, modifiedAt = System.currentTimeMillis()))
+        return true
+    }
+
+    suspend fun trashDocuments(ids: List<Long>) {
+        if (ids.isNotEmpty()) db.documents().trash(ids, System.currentTimeMillis())
+    }
+
+    /** Trashes the folder, its subfolders and their documents, all with one timestamp so restore can undo exactly this. */
+    suspend fun trashFolder(id: Long) = db.withTransaction {
+        val ids = subtreeIds(db.folders().all(), id).toList()
+        val now = System.currentTimeMillis()
+        db.documents().trashInFolders(ids, now)
+        db.folders().trash(ids, now)
+    }
+
+    /** Restores a document. If its folder is gone or trashed, it goes to the root. */
+    suspend fun restoreDocument(id: Long) {
+        val doc = db.documents().get(id) ?: return
+        val folder = doc.folderId?.let { db.folders().get(it) }?.takeIf { it.trashedAt == null }
+        db.documents().restore(listOf(id), folder?.id)
+    }
+
+    /** Restores a folder with the subfolders and documents trashed together with it. */
+    suspend fun restoreFolder(id: Long) = db.withTransaction {
+        val f = db.folders().get(id) ?: return@withTransaction
+        val stamp = f.trashedAt ?: return@withTransaction
+        val parentOk = f.parentId?.let { db.folders().get(it) }?.takeIf { it.trashedAt == null } != null
+        if (f.parentId != null && !parentOk) db.folders().update(f.copy(parentId = null))
+        val ids = subtreeIds(db.folders().all(), id).toList()
+        db.folders().restore(ids, stamp)
+        db.documents().restoreInFolders(ids, stamp)
+    }
+
+    /** Deletes a trashed folder for good, with its trashed contents. */
+    suspend fun deleteFolderForever(id: Long) {
+        val ids = subtreeIds(db.folders().all(), id).toList()
+        val docs = db.documents().allTrashed().filter { it.folderId in ids }
+        docs.forEach { deleteDocument(it.id) }
+        db.folders().delete(ids)
+    }
+
+    suspend fun emptyTrash() {
+        db.documents().allTrashed().forEach { deleteDocument(it.id) }
+        val roots = db.folders().all().filter { it.trashedAt != null }
+        db.folders().delete(roots.map { it.id })
+    }
+
+    /** Deletes trash older than [maxAgeMs] (30 days by default). Returns how many documents went. */
+    suspend fun purgeOldTrash(now: Long = System.currentTimeMillis(), maxAgeMs: Long = THIRTY_DAYS_MS): Int {
+        val cutoff = now - maxAgeMs
+        val docs = db.documents().trashedBefore(cutoff)
+        docs.forEach { deleteDocument(it.id) }
+        val oldFolders = db.folders().all().filter { (it.trashedAt ?: Long.MAX_VALUE) < cutoff }
+        db.folders().delete(oldFolders.map { it.id })
+        return docs.size
+    }
+
+    private fun subtreeIds(all: List<FolderEntity>, rootId: Long): Set<Long> {
+        val result = linkedSetOf(rootId)
+        var grew = true
+        while (grew) {
+            grew = false
+            for (f in all) if (f.parentId in result && result.add(f.id)) grew = true
+        }
+        return result
+    }
+
+    /** Deletes the document and its files for good. The UI sends documents to trash first. */
     suspend fun deleteDocument(id: Long) {
         val doc = db.documents().get(id) ?: return
         db.documents().delete(doc)

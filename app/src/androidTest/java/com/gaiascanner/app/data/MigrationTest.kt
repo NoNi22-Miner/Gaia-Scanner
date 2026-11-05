@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.gaiascanner.app.TestFiles
 import com.gaiascanner.app.core.PageFilter
 import com.gaiascanner.app.data.db.AppDatabase
+import com.gaiascanner.app.data.db.FolderEntity
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -43,7 +44,8 @@ class MigrationTest {
         val pagesSql = statements.single { it.contains("TABLE `pages`") }
         dropColumns.forEach { assertTrue("pages SQL has $it: $pagesSql", pagesSql.contains(it)) }
         val old = SQLiteDatabase.openOrCreateDatabase(ctx.getDatabasePath(name), null)
-        statements.forEach { sql -> old.execSQL(dropColumns.fold(sql) { s, col -> s.replace(col, "") }) }
+        // Tables and indexes that did not exist at that version (folders arrived in version 4).
+        statements.filterNot { it.contains("`folders`") }.forEach { sql -> old.execSQL(dropColumns.fold(sql) { s, col -> s.replace(col, "") }) }
         old.execSQL(
             "INSERT INTO documents (id, name, kind, pageCount, sizeBytes, localPath, locked, createdAt, modifiedAt) " +
                 "VALUES (1, 'old', 'IMAGES', 1, 10, '/x', 0, 1, 1)",
@@ -54,8 +56,25 @@ class MigrationTest {
     }
 
     private fun open(name: String) = Room.databaseBuilder(TestFiles.context, AppDatabase::class.java, name)
-        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
+        .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
         .build()
+
+    @Test
+    fun migration3To4AddsFoldersAndKeepsDocuments() = runBlocking<Unit> {
+        val name = "migration-3-test.db"
+        buildOld(
+            name, 3, emptyList(),
+            "id, documentId, sortIndex, imagePath, width, height, rotation",
+            "1, 1, 0, '/x/a.jpg', 400, 300, 0",
+        )
+        val db = open(name)
+        assertEquals("old", db.documents().get(1)!!.name)
+        val folderId = db.folders().insert(FolderEntity(name = "Taxes", createdAt = 1, modifiedAt = 1))
+        db.documents().moveTo(listOf(1), folderId, 2)
+        assertEquals(folderId, db.documents().get(1)!!.folderId)
+        db.close()
+        TestFiles.context.deleteDatabase(name)
+    }
 
     @Test
     fun migration1To3KeepsPages() = runBlocking<Unit> {

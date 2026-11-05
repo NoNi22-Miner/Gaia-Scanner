@@ -28,7 +28,7 @@ data class DocumentEntity(
     val pageCount: Int,
     val sizeBytes: Long,
     val localPath: String,
-    /** Folders arrive in phase 3. */
+    /** Null means the library root. */
     val folderId: Long? = null,
     /** Drive sync arrives in phase 4. */
     val driveFileId: String? = null,
@@ -36,7 +36,19 @@ data class DocumentEntity(
     val locked: Boolean = false,
     val createdAt: Long,
     val modifiedAt: Long,
-    /** Trash arrives in phase 3. */
+    /** Set when moved to trash; null otherwise. */
+    val trashedAt: Long? = null,
+)
+
+/** A library folder (DB version 4). Nested through [parentId]; null parent means the root. */
+@Entity(tableName = "folders", indices = [Index("parentId"), Index("trashedAt")])
+data class FolderEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val parentId: Long? = null,
+    val createdAt: Long,
+    val modifiedAt: Long,
+    /** Set when the folder was trashed (itself or with a parent folder). */
     val trashedAt: Long? = null,
 )
 
