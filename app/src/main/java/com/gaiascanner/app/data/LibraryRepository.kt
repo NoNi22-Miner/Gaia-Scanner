@@ -10,6 +10,10 @@ import com.gaiascanner.app.core.EraseStrokes
 import com.gaiascanner.app.core.FileNames
 import com.gaiascanner.app.core.PageEdit
 import com.gaiascanner.app.core.PageFilter
+import com.gaiascanner.app.core.PageMath
+import com.gaiascanner.app.core.CropRotation
+import com.gaiascanner.app.core.Quad
+import com.gaiascanner.app.engine.BlankPage
 import com.gaiascanner.app.core.Rotation
 import com.gaiascanner.app.data.db.AppDatabase
 import com.gaiascanner.app.data.db.DocumentEntity
@@ -280,6 +284,36 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
             pages.add(to, pages.removeAt(from))
             db.pages().updateAll(pages.mapIndexed { i, p -> p.copy(sortIndex = i) })
             touch(documentId)
+        }
+    }
+
+    /**
+     * Adds a white page to an image document, shaped like the page it follows
+     * (or like the last page). [afterPageId] null means at the end.
+     * Returns the new page id, or null if the document is not an image set.
+     */
+    suspend fun addBlankPage(documentId: Long, afterPageId: Long?): Long? {
+        val doc = db.documents().get(documentId)?.takeIf { it.kind == DocumentKind.IMAGES } ?: return null
+        val pages = db.pages().getForDocument(documentId)
+        val reference = afterPageId?.let { id -> pages.firstOrNull { it.id == id } } ?: pages.lastOrNull()
+        val refSize = reference?.let { CropRotation.finalSize(it.width, it.height, Quad.parse(it.crop), it.rotation) }
+        val (w, h) = PageMath.blankPageSize(refSize?.first, refSize?.second)
+        val dir = File(doc.localPath).apply { mkdirs() }
+        val file = withContext(Dispatchers.IO) {
+            val name = FileNames.unique("blank_${System.currentTimeMillis()}.jpg") { File(dir, it).exists() }
+            File(dir, name).also { BlankPage.write(it, w, h) }
+        }
+        return db.withTransaction {
+            val current = db.pages().getForDocument(documentId).toMutableList()
+            val at = afterPageId?.let { id -> current.indexOfFirst { it.id == id } }?.takeIf { it >= 0 }?.plus(1) ?: current.size
+            val newId = db.pages().insertAll(
+                listOf(PageEntity(documentId = documentId, sortIndex = at, imagePath = file.path, width = w, height = h)),
+            ).single()
+            val inserted = db.pages().get(newId)!!
+            current.add(at, inserted)
+            db.pages().updateAll(current.mapIndexed { i, p -> p.copy(sortIndex = i) })
+            refreshImageDocument(documentId)
+            newId
         }
     }
 

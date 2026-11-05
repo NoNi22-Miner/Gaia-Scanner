@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -182,6 +183,7 @@ fun DocumentScreen(
                 onMakePdf = { showMakePdf = true },
                 onSave = { saveFolder.launch(null) },
                 onAddImages = vm::addImages,
+                onAddBlank = { vm.addBlankPage(it) },
                 onOpenCamera = { onOpenCamera(doc.id) },
             )
         }
@@ -288,6 +290,7 @@ private fun ImagesContent(
     onMakePdf: () -> Unit,
     onSave: () -> Unit,
     onAddImages: (List<android.net.Uri>) -> Unit,
+    onAddBlank: (afterPageId: Long?) -> Unit,
     onOpenCamera: () -> Unit,
 ) {
     val pickGallery = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
@@ -315,6 +318,7 @@ private fun ImagesContent(
                         onDown = { onMove(page.id, 1) },
                         onAdjust = { onAdjust(page.id) },
                         onRemove = { onRemove(page.id) },
+                        onBlankAfter = { onAddBlank(page.id) },
                     )
                     HorizontalDivider()
                 }
@@ -347,6 +351,10 @@ private fun ImagesContent(
                             addMenu = false
                             onOpenCamera()
                         })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_blank_page_end)) }, onClick = {
+                            addMenu = false
+                            onAddBlank(null)
+                        })
                     }
                 }
                 OutlinedButton(onClick = onSave, enabled = pages.isNotEmpty()) { Text(stringResource(R.string.action_save)) }
@@ -365,7 +373,9 @@ private fun PageRow(
     onDown: () -> Unit,
     onAdjust: () -> Unit,
     onRemove: () -> Unit,
+    onBlankAfter: () -> Unit,
 ) {
+    var menu by remember { mutableStateOf(false) }
     Row(
         Modifier
             .fillMaxWidth()
@@ -387,8 +397,21 @@ private fun PageRow(
         IconButton(onClick = onDown, enabled = !isLast) {
             Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.action_move_down))
         }
-        IconButton(onClick = onRemove) {
-            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_remove_page))
+        Box {
+            IconButton(onClick = { menu = true }) {
+                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_blank_page_after)) },
+                    onClick = { menu = false; onBlankAfter() },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_remove_page)) },
+                    leadingIcon = { Icon(Icons.Filled.Close, contentDescription = null) },
+                    onClick = { menu = false; onRemove() },
+                )
+            }
         }
     }
 }

@@ -141,6 +141,9 @@
     <string name="action_move_up">Move up</string>
     <string name="action_move_down">Move down</string>
     <string name="action_remove_page">Remove page</string>
+    <string name="action_blank_page_end">Blank page at the end</string>
+    <string name="action_blank_page_after">Insert blank page after</string>
+    <string name="blank_page_added">Blank page added.</string>
     <string name="delete_title">Move to trash?</string>
     <string name="delete_body">“%1$s” goes to the trash. You can restore it for 30 days. Copies you saved elsewhere are not affected.</string>
     <string name="created_at">Added %1$s</string>

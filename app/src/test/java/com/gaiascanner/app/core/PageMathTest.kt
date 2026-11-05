@@ -98,4 +98,17 @@ class PageMathTest {
         assertEquals(4, PageMath.sampleSize(4000, 3000, 1000, 700))
         assertEquals(1, PageMath.sampleSize(100, 100, 200, 200))
     }
+
+    @Test
+    fun blankPageKeepsTheReferenceShape() {
+        assertEquals(1240 to 1754, PageMath.blankPageSize(2480, 3508))
+        assertEquals(1754 to 1316, PageMath.blankPageSize(4000, 3000))
+        assertEquals(1754 to 1754, PageMath.blankPageSize(10, 10))
+    }
+
+    @Test
+    fun blankPageWithoutReferenceIsA4Portrait() {
+        assertEquals(1240 to 1754, PageMath.blankPageSize(null, null))
+        assertEquals(1240 to 1754, PageMath.blankPageSize(0, 100))
+    }
 }

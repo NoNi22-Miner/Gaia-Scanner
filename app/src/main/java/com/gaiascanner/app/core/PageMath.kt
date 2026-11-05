@@ -51,6 +51,23 @@ object PageMath {
     }
 
     /** Page size for an image of [imageWidth] x [imageHeight] pixels (already rotated). */
+    /** Long side of a new blank page image: A4 at 150 DPI. Plain white, so more pixels add nothing. */
+    const val BLANK_LONG_SIDE_PX = 1754
+
+    /**
+     * Pixel size of a new blank page with the same shape as a reference page of
+     * [refWidth] x [refHeight] (its final size after crop and rotation). Without a
+     * reference, an A4 portrait page.
+     */
+    fun blankPageSize(refWidth: Int?, refHeight: Int?): Pair<Int, Int> {
+        if (refWidth == null || refHeight == null || refWidth <= 0 || refHeight <= 0) {
+            // A4 is exactly 210 x 297 mm; the whole-point A4 above rounds to 1239 px.
+            return (BLANK_LONG_SIDE_PX * 210.0 / 297.0).roundToInt() to BLANK_LONG_SIDE_PX
+        }
+        val scale = BLANK_LONG_SIDE_PX.toDouble() / max(refWidth, refHeight)
+        return max(1, (refWidth * scale).roundToInt()) to max(1, (refHeight * scale).roundToInt())
+    }
+
     fun pageSizeFor(imageWidth: Int, imageHeight: Int, option: PageSizeOption): PagePoints {
         require(imageWidth > 0 && imageHeight > 0) { "Image size must be positive" }
         val landscape = imageWidth > imageHeight

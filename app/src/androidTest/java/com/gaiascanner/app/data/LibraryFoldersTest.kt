@@ -120,4 +120,28 @@ class LibraryFoldersTest {
         assertNull(db.folders().get(a))
         library.deleteDocument(second)
     }
+
+    @Test
+    fun blankPageGoesAfterTheChosenPageWithItsShape() = runBlocking<Unit> {
+        val tmp = TestFiles.tempDir("blank")
+        val sources = listOf(400 to 300, 300 to 400).mapIndexed { i, (w, h) ->
+            File(tmp, "img$i.jpg").also { TestFiles.solidImage(it, w, h, android.graphics.Color.RED) }
+        }
+        val docId = library.importImages(sources.map { android.net.Uri.fromFile(it) }).documentIds.single()
+        val before = library.getPages(docId)
+
+        val blankId = library.addBlankPage(docId, afterPageId = before[0].id)!!
+        val after = library.getPages(docId)
+        assertEquals(listOf(before[0].id, blankId, before[1].id), after.map { it.id })
+        val blank = after[1]
+        assertEquals(1754, blank.width)
+        assertEquals(1316, blank.height)
+        assertTrue(File(blank.imagePath).exists())
+        assertEquals(3, db.documents().get(docId)!!.pageCount)
+
+        val endId = library.addBlankPage(docId, afterPageId = null)!!
+        assertEquals(endId, library.getPages(docId).last().id)
+        library.deleteDocument(docId)
+        tmp.deleteRecursively()
+    }
 }

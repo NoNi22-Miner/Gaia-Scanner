@@ -70,6 +70,12 @@ class DocumentViewModel(private val container: AppContainer, private val documen
 
     fun removePage(pageId: Long) = viewModelScope.launch { container.library.removePage(pageId) }
 
+    /** [afterPageId] null adds the blank page at the end. */
+    fun addBlankPage(afterPageId: Long?) = viewModelScope.launch {
+        container.library.addBlankPage(documentId, afterPageId)
+        _messages.emit(Message(context.getString(R.string.blank_page_added)))
+    }
+
     fun addImages(uris: List<Uri>) = viewModelScope.launch {
         _messages.emit(Message(importSummary(context, container.library.importImages(uris, documentId))))
     }
