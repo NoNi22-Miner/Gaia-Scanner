@@ -17,6 +17,7 @@ import com.gaiascanner.app.core.LibraryView
 import com.gaiascanner.app.core.MarginOption
 import com.gaiascanner.app.core.PageSizeOption
 import com.gaiascanner.app.core.SortField
+import com.gaiascanner.app.core.WatermarkStyle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -36,6 +37,8 @@ data class AppSettings(
     val libraryView: LibraryView = LibraryView.LIST,
     /** The tutorial opens by itself until it has been shown once. */
     val tutorialSeen: Boolean = false,
+    /** Last watermark used, so the owner's text is ready next time. */
+    val watermark: WatermarkStyle = WatermarkStyle(),
 )
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -65,6 +68,16 @@ class SettingsRepository(private val context: Context) {
         ),
         libraryView = enumOrNull<LibraryView>(p[LIBRARY_VIEW]) ?: LibraryView.LIST,
         tutorialSeen = p[TUTORIAL_SEEN] ?: false,
+        watermark = WatermarkStyle().let { d ->
+            WatermarkStyle(
+                text = p[WM_TEXT] ?: d.text,
+                sizePercent = p[WM_SIZE] ?: d.sizePercent,
+                color = p[WM_COLOR] ?: d.color,
+                opacity = p[WM_OPACITY] ?: d.opacity,
+                angle = p[WM_ANGLE] ?: d.angle,
+                tiled = p[WM_TILED] ?: d.tiled,
+            ).normalized()
+        },
     )
 
     private fun write(p: MutablePreferences, s: AppSettings) {
@@ -78,6 +91,12 @@ class SettingsRepository(private val context: Context) {
         p[SORT_ASCENDING] = s.librarySort.ascending
         p[LIBRARY_VIEW] = s.libraryView.name
         p[TUTORIAL_SEEN] = s.tutorialSeen
+        p[WM_TEXT] = s.watermark.text
+        p[WM_SIZE] = s.watermark.sizePercent
+        p[WM_COLOR] = s.watermark.color
+        p[WM_OPACITY] = s.watermark.opacity
+        p[WM_ANGLE] = s.watermark.angle
+        p[WM_TILED] = s.watermark.tiled
     }
 
     private companion object {
@@ -91,6 +110,12 @@ class SettingsRepository(private val context: Context) {
         val SORT_ASCENDING = booleanPreferencesKey("library_sort_ascending")
         val LIBRARY_VIEW = stringPreferencesKey("library_view")
         val TUTORIAL_SEEN = booleanPreferencesKey("tutorial_seen")
+        val WM_TEXT = stringPreferencesKey("watermark_text")
+        val WM_SIZE = intPreferencesKey("watermark_size_percent")
+        val WM_COLOR = intPreferencesKey("watermark_color")
+        val WM_OPACITY = intPreferencesKey("watermark_opacity")
+        val WM_ANGLE = intPreferencesKey("watermark_angle")
+        val WM_TILED = booleanPreferencesKey("watermark_tiled")
 
         inline fun <reified T : Enum<T>> enumOrNull(name: String?): T? =
             name?.let { n -> enumValues<T>().firstOrNull { it.name == n } }

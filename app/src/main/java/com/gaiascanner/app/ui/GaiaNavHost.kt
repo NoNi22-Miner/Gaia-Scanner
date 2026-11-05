@@ -17,6 +17,8 @@ import com.gaiascanner.app.ui.info.TutorialScreen
 import com.gaiascanner.app.ui.jobs.JobsScreen
 import com.gaiascanner.app.ui.library.LibraryScreen
 import com.gaiascanner.app.ui.settings.SettingsScreen
+import com.gaiascanner.app.ui.tools.ReduceSizeScreen
+import com.gaiascanner.app.ui.tools.WatermarkScreen
 import com.gaiascanner.app.ui.trash.TrashScreen
 
 private object Routes {
@@ -27,6 +29,11 @@ private object Routes {
     const val TRASH = "trash"
     const val TUTORIAL = "tutorial"
     const val ABOUT = "about"
+    const val REDUCE = "reduce/{id}"
+    const val WATERMARK = "watermark/{id}"
+
+    fun reduce(id: Long) = "reduce/$id"
+    fun watermark(id: Long) = "watermark/$id"
 
     /** doc = -1 starts a new image document. */
     const val CAMERA = "camera?doc={doc}"
@@ -70,6 +77,8 @@ fun GaiaNavHost() {
                 onOpenJobs = { nav.navigate(Routes.JOBS) },
                 onOpenCamera = { nav.navigate(Routes.camera(it)) },
                 onAdjustPage = { pageId -> nav.navigate(Routes.editor(id, listOf(pageId), PageEditorViewModel.Mode.ENHANCE, auto = false)) },
+                onReduceSize = { nav.navigate(Routes.reduce(id)) },
+                onWatermark = { nav.navigate(Routes.watermark(id)) },
             )
         }
         composable(
@@ -130,6 +139,12 @@ fun GaiaNavHost() {
         }
         composable(Routes.ABOUT) {
             AboutScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.REDUCE, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
+            ReduceSizeScreen(documentId = entry.arguments?.getLong("id") ?: -1L, onBack = { nav.popBackStack() })
+        }
+        composable(Routes.WATERMARK, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
+            WatermarkScreen(documentId = entry.arguments?.getLong("id") ?: -1L, onBack = { nav.popBackStack() })
         }
     }
 }

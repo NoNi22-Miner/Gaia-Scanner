@@ -103,6 +103,8 @@ fun DocumentScreen(
     onOpenJobs: () -> Unit,
     onOpenCamera: (Long) -> Unit,
     onAdjustPage: (Long) -> Unit,
+    onReduceSize: () -> Unit,
+    onWatermark: () -> Unit,
 ) {
     val context = LocalContext.current
     val container = context.appContainer
@@ -159,6 +161,28 @@ fun DocumentScreen(
                     IconButton(onClick = { confirmDelete = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_move_to_trash))
                     }
+                    if (doc != null && !doc.locked) {
+                        var toolsMenu by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { toolsMenu = true }) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.action_more))
+                            }
+                            DropdownMenu(expanded = toolsMenu, onDismissRequest = { toolsMenu = false }) {
+                                if (doc.kind == DocumentKind.PDF) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.tool_reduce)) },
+                                        onClick = { toolsMenu = false; onReduceSize() },
+                                    )
+                                }
+                                if (doc.kind == DocumentKind.PDF || doc.pageCount > 0) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.tool_watermark)) },
+                                        onClick = { toolsMenu = false; onWatermark() },
+                                    )
+                                }
+                            }
+                        }
+                    }
                 },
             )
         },
@@ -173,6 +197,8 @@ fun DocumentScreen(
                 onConvert = { showConvert = true },
                 onSave = { savePdf.launch("${doc.name}.pdf") },
                 onUnlock = { showUnlock = true },
+                onReduceSize = onReduceSize,
+                onWatermark = onWatermark,
             )
             DocumentKind.IMAGES -> ImagesContent(
                 pages = pages,
@@ -244,6 +270,8 @@ private fun PdfContent(
     onConvert: () -> Unit,
     onSave: () -> Unit,
     onUnlock: () -> Unit,
+    onReduceSize: () -> Unit,
+    onWatermark: () -> Unit,
 ) {
     val context = LocalContext.current
     Column(
@@ -276,6 +304,8 @@ private fun PdfContent(
             Text(stringResource(R.string.created_at, created), style = MaterialTheme.typography.bodyMedium)
             Button(onClick = onConvert, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_convert_to_images)) }
             OutlinedButton(onClick = onSave, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.action_save_to_phone)) }
+            OutlinedButton(onClick = onReduceSize, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_reduce)) }
+            OutlinedButton(onClick = onWatermark, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_watermark)) }
         }
     }
 }

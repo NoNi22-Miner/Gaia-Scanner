@@ -263,4 +263,40 @@
     <string name="tutorial_convert_body">Turn images into one PDF, or a PDF into JPG or PNG pages. Save to your phone or share.</string>
     <string name="tutorial_library_title">Keep it tidy</string>
     <string name="tutorial_library_body">Make folders, sort, search, and select many files at once. Deleted files stay in the trash for 30 days.</string>
+
+    <!-- PDF tools -->
+    <string name="tool_reduce">Reduce file size</string>
+    <string name="tool_watermark">Add watermark</string>
+    <string name="suffix_small">small</string>
+    <string name="suffix_watermark">watermark</string>
+    <string name="tool_saved">Saved as “%1$s”.</string>
+    <string name="tool_raster_note">Pages are saved as images, so text in the copy can no longer be selected or searched. The original is kept.</string>
+    <string name="reduce_current_size">Now: %1$s</string>
+    <string name="preset_high">High</string>
+    <string name="preset_high_body">Best quality, 150 DPI</string>
+    <string name="preset_medium">Medium</string>
+    <string name="preset_medium_body">Balanced, 120 DPI</string>
+    <string name="preset_small">Small</string>
+    <string name="preset_small_body">Smallest file, 90 DPI</string>
+    <string name="action_make_smaller_copy">Make smaller copy</string>
+    <string name="tool_working">Page %1$d of %2$d</string>
+    <string name="reduce_result">Original %1$s → copy %2$s (%3$d%% smaller)</string>
+    <string name="reduce_not_smaller">The copy is not smaller (original %1$s, copy %2$s). Try a smaller preset.</string>
+    <string name="action_keep_copy">Save copy</string>
+    <string name="action_discard_copy">Discard</string>
+    <string name="watermark_text">Watermark text</string>
+    <string name="watermark_text_hint">For example: © Your Name 2026</string>
+    <string name="watermark_size">Size: %1$d%%</string>
+    <string name="watermark_opacity">Opacity: %1$d%%</string>
+    <string name="watermark_angle">Angle: %1$d°</string>
+    <string name="watermark_color">Color</string>
+    <string name="watermark_single">Single</string>
+    <string name="watermark_tiled">Tiled</string>
+    <string name="action_save_watermarked">Save as new PDF</string>
+    <string name="watermark_images_note">The new PDF uses the page size and margins from Settings. The original is kept.</string>
+    <string name="color_gray">Gray</string>
+    <string name="color_black">Black</string>
+    <string name="color_red">Red</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_white">White</string>
 </resources>
