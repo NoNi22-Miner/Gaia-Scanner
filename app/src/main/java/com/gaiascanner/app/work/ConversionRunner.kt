@@ -101,7 +101,7 @@ class ConversionRunner(
                     files.moveFile(page.file, target)
                     Triple(target, page.width, page.height)
                 }
-                results += library.addImageDocument(dir, base, moved)
+                results += library.addImageDocument(dir, base, moved, folderId = doc.folderId)
                 val lowered = pages.withIndex().filter { it.value.capped }.map { it.index + 1 }
                 if (lowered.isNotEmpty()) {
                     notes += context.getString(R.string.note_lower_dpi, doc.name, lowered.joinToString(", "))
@@ -150,7 +150,7 @@ class ConversionRunner(
         val target = File(dir, name)
         files.moveFile(staged, target)
         val id = try {
-            library.addPdfFile(target, FileNames.baseName(name))
+            library.addPdfFile(target, FileNames.baseName(name), folderId = doc.folderId)
         } catch (e: Throwable) {
             dir.deleteRecursively()
             throw e

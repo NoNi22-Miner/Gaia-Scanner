@@ -43,6 +43,16 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
 
     val documents: Flow<List<DocumentEntity>> = db.documents().observeAll()
 
+    /**
+     * Folder that new imports and camera documents go into: the folder open in the library.
+     * Checked at insert time, so a folder trashed meanwhile sends new documents to the root.
+     */
+    @Volatile
+    var targetFolderId: Long? = null
+
+    private suspend fun liveFolder(id: Long?): Long? =
+        id?.let { db.folders().get(it) }?.takeIf { it.trashedAt == null }?.id
+
     fun document(id: Long): Flow<DocumentEntity?> = db.documents().observe(id)
 
     fun pages(documentId: Long): Flow<List<PageEntity>> = db.pages().observeForDocument(documentId)
@@ -74,7 +84,7 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
     }
 
     /** Registers a PDF file that is already in its own library folder. */
-    suspend fun addPdfFile(file: File, name: String): Long {
+    suspend fun addPdfFile(file: File, name: String, folderId: Long? = targetFolderId): Long {
         val (pageCount, locked) = try {
             PdfFiles.pageCount(file) to false
         } catch (e: ConvertException) {
@@ -88,6 +98,7 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
                 pageCount = pageCount,
                 sizeBytes = file.length(),
                 localPath = file.path,
+                folderId = liveFolder(folderId),
                 locked = locked,
                 createdAt = now,
                 modifiedAt = now,
@@ -215,6 +226,7 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
                     pageCount = 0,
                     sizeBytes = 0,
                     localPath = dir.path,
+                    folderId = liveFolder(targetFolderId),
                     createdAt = now,
                     modifiedAt = now,
                 ),
@@ -227,8 +239,14 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
     }
 
     /** Registers image files already in their own library folder as a new document. */
-    suspend fun addImageDocument(dir: File, name: String, images: List<Triple<File, Int, Int>>): Long {
+    suspend fun addImageDocument(
+        dir: File,
+        name: String,
+        images: List<Triple<File, Int, Int>>,
+        folderId: Long? = targetFolderId,
+    ): Long {
         val now = System.currentTimeMillis()
+        val folder = liveFolder(folderId)
         return db.withTransaction {
             val id = db.documents().insert(
                 DocumentEntity(
@@ -237,6 +255,7 @@ class LibraryRepository(private val db: AppDatabase, private val files: FileStor
                     pageCount = 0,
                     sizeBytes = 0,
                     localPath = dir.path,
+                    folderId = folder,
                     createdAt = now,
                     modifiedAt = now,
                 ),

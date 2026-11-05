@@ -3,6 +3,7 @@ package com.gaiascanner.app.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -11,8 +12,11 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gaiascanner.app.core.ConvertDefaults
 import com.gaiascanner.app.core.ImageFormat
+import com.gaiascanner.app.core.LibrarySort
+import com.gaiascanner.app.core.LibraryView
 import com.gaiascanner.app.core.MarginOption
 import com.gaiascanner.app.core.PageSizeOption
+import com.gaiascanner.app.core.SortField
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -27,6 +31,9 @@ data class AppSettings(
     val margin: MarginOption = MarginOption.NONE,
     /** Tree URI of the folder every result is also copied to, or null. */
     val outputFolderUri: String? = null,
+    /** Library sort, one choice for every folder. Default: newest change first. */
+    val librarySort: LibrarySort = LibrarySort(),
+    val libraryView: LibraryView = LibraryView.LIST,
 )
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -50,6 +57,11 @@ class SettingsRepository(private val context: Context) {
         pageSize = enumOrNull<PageSizeOption>(p[PAGE_SIZE]) ?: PageSizeOption.FIT,
         margin = enumOrNull<MarginOption>(p[MARGIN]) ?: MarginOption.NONE,
         outputFolderUri = p[OUTPUT_FOLDER],
+        librarySort = LibrarySort(
+            field = enumOrNull<SortField>(p[SORT_FIELD]) ?: SortField.MODIFIED,
+            ascending = p[SORT_ASCENDING] ?: false,
+        ),
+        libraryView = enumOrNull<LibraryView>(p[LIBRARY_VIEW]) ?: LibraryView.LIST,
     )
 
     private fun write(p: MutablePreferences, s: AppSettings) {
@@ -59,6 +71,9 @@ class SettingsRepository(private val context: Context) {
         p[PAGE_SIZE] = s.pageSize.name
         p[MARGIN] = s.margin.name
         if (s.outputFolderUri == null) p.remove(OUTPUT_FOLDER) else p[OUTPUT_FOLDER] = s.outputFolderUri
+        p[SORT_FIELD] = s.librarySort.field.name
+        p[SORT_ASCENDING] = s.librarySort.ascending
+        p[LIBRARY_VIEW] = s.libraryView.name
     }
 
     private companion object {
@@ -68,6 +83,9 @@ class SettingsRepository(private val context: Context) {
         val PAGE_SIZE = stringPreferencesKey("page_size")
         val MARGIN = stringPreferencesKey("margin")
         val OUTPUT_FOLDER = stringPreferencesKey("output_folder_uri")
+        val SORT_FIELD = stringPreferencesKey("library_sort_field")
+        val SORT_ASCENDING = booleanPreferencesKey("library_sort_ascending")
+        val LIBRARY_VIEW = stringPreferencesKey("library_view")
 
         inline fun <reified T : Enum<T>> enumOrNull(name: String?): T? =
             name?.let { n -> enumValues<T>().firstOrNull { it.name == n } }

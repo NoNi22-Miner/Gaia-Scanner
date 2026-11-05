@@ -13,7 +13,9 @@ import com.gaiascanner.app.engine.PageRenderer
 import com.gaiascanner.app.engine.PdfFiles
 import com.gaiascanner.app.work.ConversionRunner
 import com.gaiascanner.app.work.JobRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.withContext
@@ -30,6 +32,9 @@ class AppContainer(context: Context) {
     val jobs = JobRepository(appContext, database)
     val conversionRunner = ConversionRunner(appContext, database, files, library, settings, exporter)
     val thumbnails = ThumbnailCache()
+
+    /** For work that outlives a screen, such as the trash clean-up at start. */
+    val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 8)
 
