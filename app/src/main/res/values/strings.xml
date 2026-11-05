@@ -279,6 +279,7 @@
     <string name="preset_small">Small</string>
     <string name="preset_small_body">Smallest file, 90 DPI</string>
     <string name="action_make_smaller_copy">Make smaller copy</string>
+    <string name="reduce_hint">Works best on scanned or photo PDFs. A PDF that is mostly text can get bigger.</string>
     <string name="tool_working">Page %1$d of %2$d</string>
     <string name="reduce_result">Original %1$s → copy %2$s (%3$d%% smaller)</string>
     <string name="reduce_not_smaller">The copy is not smaller (original %1$s, copy %2$s). Try a smaller preset.</string>

@@ -67,6 +67,7 @@ Pro tier (paid):
 - Edge detection (phase 2b, synthetic scenes): corners within 0.33% on wood, light-gray and dark backgrounds with uneven light, 18 to 51 ms; a plain background gives no page.
 - Filters on a 2480 x 3208 page: Clear 138 to 265 ms, Docs 97 to 116 ms, Color 174 to 300 ms, Photo 46 to 76 ms. Clear turned shaded paper to 255; Docs had no speckles or mid-tones. Smart fill on a 400 x 300 area: 30 to 60 ms.
 - Phone debug APK with OpenCV (arm64-v8a + armeabi-v7a): 36 MB zipped artifact (was 16.6 MB).
+- Phase 3 (2026-11-05, both APIs passed): migration 3 to 4, folder trash/restore/purge, blank page, reduce size and watermark keep page count and page sizes. A 3-page vector PDF (1.5 KB) became 24 to 52 KB after Reduce (text turns into images), so Reduce only helps scanned or photo PDFs; the screen says so. Not yet measured on a photo-heavy PDF.
 
 ## Data (metadata only; files stay on the phone and in Drive)
 - Settings: output format, JPEG quality, render DPI, page size and margins, output folder, theme, language, Drive sync on/off.

@@ -96,6 +96,7 @@ fun ReduceSizeScreen(documentId: Long, onBack: () -> Unit) {
                     }
                 }
             }
+            Text(stringResource(R.string.reduce_hint), style = MaterialTheme.typography.bodySmall)
             Text(stringResource(R.string.tool_raster_note), style = MaterialTheme.typography.bodySmall)
 
             when (val p = progress) {
