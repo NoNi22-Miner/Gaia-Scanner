@@ -201,17 +201,17 @@ Per CLAUDE.md, the security design happens in phase 5 with a stronger model. Thi
 
 Answered in phases 1 and 2: minSdk 29; inputs include WebP and HEIC; 90° rotate; in-app camera (Single/Batch); 4-corner crop with auto edge detection (OpenCV); filters, brightness/contrast, eraser; the ClearScanner functions adopted on 2026-11-04 and placed in phases (CLAUDE.md).
 
-Before phase 3 code (ask the owner):
-1. Trash: delete for good after 30 days [proposal], or keep until emptied?
-2. Sort: options name, date created, date modified, size; remembered for the whole library or per folder?
-3. Search by name: in phase 3 or later?
-4. Library view: list or grid by default? What each item shows (thumbnail, name, size, page count, date).
-5. Select many: which actions (share, move to folder, trash, convert)? Merging documents is still out of scope unless the owner adds it.
-6. Home screen: Gallery and Camera buttons at the bottom (like ClearScanner). Do Import PDF, Import images and New folder move to the top-right menu?
-7. Text watermark: text, font, size, color, opacity, angle, single or tiled pattern? Applied only when making or sharing a PDF, or stored per document and shown in previews? Never on by default.
-8. Reduce file size: presets (for example High, Medium, Small) or a target size? Replace the PDF, or save a smaller copy? Show the new size before saving.
-9. New blank page: size (same as the document, A4 or Letter) and where it goes (end, or after the current page).
-10. Side menu: Settings, Trash, Tutorial, Feature request / bug report, About. What the Tutorial shows (a few swipe screens?). The support email stays a placeholder until release.
-11. Deleting a folder: its documents go to trash (spec section 4). Confirm.
+Answered for phase 3 (owner, 2026-11-05):
+1. Trash: deleted for good after 30 days; restore before that; empty by hand too.
+2. Sort (name, date created, date modified, size; up/down): one choice for the whole library, remembered.
+3. Search by name: built in phase 3.
+4. Library view: list by default, grid is a toggle. Items show page-1 thumbnail, name, page count, date (list also size).
+5. Select many: share, move to trash, move to folder, convert. No merging.
+6. Home: Gallery and Camera buttons at the bottom. Import PDF, Import images and New folder go in the top-right menu.
+7. Text watermark: text, size, color, opacity, angle, single or tiled; default font. Applied only when saving a new PDF copy (with preview); the original stays clean. Never on by default.
+8. Reduce file size: presets High / Medium / Small; saves a smaller copy; shows the estimated new size first. The original is kept.
+9. New blank page: same size as the document; add at the end or after the current page.
+10. Side menu: Settings, Trash, Tutorial, Feature request / bug report, About. Tutorial = a few swipe screens (scan, edit, convert, library), shown at first launch and from the menu. Support email stays a placeholder.
+11. Deleting a folder: the folder and its documents go to trash.
 
 Later phases: isolated process for PdfRenderer (decide before phase 4); free manual Drive upload and Backup/Restore format (phase 4); member upload path, rule 4 scope, owner recovery details and hosting (phase 5); Play billing for invoiced plans (phase 6).

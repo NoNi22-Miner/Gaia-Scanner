@@ -33,6 +33,11 @@ Pro tier (paid):
 - The cloud sandbox cannot reach dl.google.com or downloads.gradle.org, so the Android build runs only in GitHub Actions (.github/workflows/android.yml). scripts/core-tests-local.sh runs the plain-Kotlin tests locally.
 - Long jobs use WorkManager foreground work with type dataSync (the docs list "local file processing" under it).
 
+## Phase 3 decisions (owner, 2026-11-05; details in docs/SPEC.md section 8)
+- Trash purges after 30 days. One sort choice for the whole library. Search by name included. List view by default, grid toggle.
+- Select many: share, trash, move to folder, convert. Home: Gallery and Camera buttons at the bottom; imports and New folder in the top-right menu. Deleting a folder sends its contents to trash.
+- Watermark and Reduce size always save a new PDF copy (original kept); reduce uses High/Medium/Small presets with estimated size shown. Blank page matches the document size, at the end or after the current page. Tutorial is swipe screens.
+
 ## Open decisions: ask the user before coding
 - Full list per phase: docs/SPEC.md section 8. Spec: docs/SPEC.md.
 - Owner recovery details (phase 5): the authenticator must not live only on the owner phone, or a lost phone loses both. Backup codes? What happens to the old device after re-binding? Does the owner also sign in with Google (needed for Drive anyway)?
