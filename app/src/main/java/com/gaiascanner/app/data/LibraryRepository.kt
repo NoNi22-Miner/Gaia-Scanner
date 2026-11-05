@@ -26,7 +26,7 @@ import java.io.File
 
 class LibraryRepository(private val db: AppDatabase, private val files: FileStore) {
     companion object {
-        const val THIRTY_DAYS_MS = 30L * 24 * 60 * 60 * 1000
+        const val THIRTY_DAYS_MS = com.gaiascanner.app.core.TrashRules.KEEP_MS
     }
 
 

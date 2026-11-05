@@ -59,4 +59,12 @@ class LibraryOrderTest {
         val loop = mapOf(1L to F(1, 2), 2L to F(2, 1))
         assertEquals(listOf(1L, 2L), LibraryOrder.pathTo(2L, loop) { it.parent }.map { it.id })
     }
+
+    @Test
+    fun treeListsParentsBeforeChildrenWithDepth() {
+        data class F(val id: Long, val parent: Long?, val name: String)
+        val folders = listOf(F(3, 1, "b"), F(1, null, "Work"), F(2, 1, "a"), F(4, null, "Home"), F(5, 99, "orphan"))
+        val tree = LibraryOrder.flattenTree(folders, { it.id }, { it.parent }, { it.name })
+        assertEquals(listOf("Home" to 0, "orphan" to 0, "Work" to 0, "a" to 1, "b" to 1), tree.map { it.first.name to it.second })
+    }
 }

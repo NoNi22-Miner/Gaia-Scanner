@@ -1,15 +1,22 @@
 package com.gaiascanner.app.ui.library
 
+import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gaiascanner.app.AppContainer
+import com.gaiascanner.app.R
+import com.gaiascanner.app.core.DocumentKind
+import com.gaiascanner.app.core.ImageFormat
+import com.gaiascanner.app.core.MarginOption
+import com.gaiascanner.app.core.PageSizeOption
 import com.gaiascanner.app.core.LibraryOrder
 import com.gaiascanner.app.core.LibrarySort
 import com.gaiascanner.app.core.LibraryView
 import com.gaiascanner.app.core.SortKey
 import com.gaiascanner.app.data.db.DocumentEntity
 import com.gaiascanner.app.data.db.FolderEntity
+import com.gaiascanner.app.data.AppSettings
 import com.gaiascanner.app.ui.importSummary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,6 +49,17 @@ class LibraryViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     private val openFolderId = MutableStateFlow<Long?>(null)
+
+    /** Documents picked in select-many mode. Empty means the mode is off. */
+    private val _selected = MutableStateFlow<Set<Long>>(emptySet())
+    val selected: StateFlow<Set<Long>> = _selected
+
+    val settings: StateFlow<AppSettings> = container.settings.settings
+        .stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
+
+    /** Every folder that is not trashed, for the "Move to" list. */
+    val allFolders: StateFlow<List<FolderEntity>> = container.library.folders
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     private val query = MutableStateFlow<String?>(null)
 
     val state: StateFlow<UiState?> = combine(
@@ -85,15 +103,96 @@ class LibraryViewModel(private val container: AppContainer) : ViewModel() {
         viewModelScope.launch { openFolderId.collect { container.library.targetFolderId = it } }
     }
 
+    private var tutorialChecked = false
+
+    /** True once per app run if the tutorial has never been shown. */
+    suspend fun takeTutorialPrompt(): Boolean {
+        if (tutorialChecked) return false
+        tutorialChecked = true
+        return !container.settings.current().tutorialSeen
+    }
+
     fun openFolder(id: Long?) {
+        _selected.value = emptySet()
         openFolderId.value = id
     }
 
     /** Goes one folder up. Returns false at the root. */
     fun goUp(): Boolean {
         val current = state.value?.currentFolder ?: return false
-        openFolderId.value = current.parentId
+        openFolder(current.parentId)
         return true
+    }
+
+    fun toggleSelected(documentId: Long) {
+        _selected.value = _selected.value.let { if (documentId in it) it - documentId else it + documentId }
+    }
+
+    fun selectAll() {
+        _selected.value = state.value?.documents.orEmpty().map { it.id }.toSet()
+    }
+
+    fun clearSelection() {
+        _selected.value = emptySet()
+    }
+
+    /** The selected documents that are still shown. */
+    private fun selectedDocuments(): List<DocumentEntity> {
+        val ids = _selected.value
+        return state.value?.documents.orEmpty().filter { it.id in ids }
+    }
+
+    /** Share sheet for every selected file. Locked PDFs are left out. */
+    suspend fun shareSelected(): Intent? {
+        val docs = selectedDocuments().filterNot { it.locked }
+        val files = docs.flatMap { container.library.documentFiles(it) }.filter { it.exists() }
+        if (files.isEmpty()) return null
+        val mime = when {
+            docs.all { it.kind == DocumentKind.PDF } -> "application/pdf"
+            docs.all { it.kind == DocumentKind.IMAGES } -> "image/*"
+            else -> "*/*"
+        }
+        return container.exporter.shareIntent(files, mime)
+    }
+
+    fun trashSelected() = viewModelScope.launch {
+        val ids = selectedDocuments().map { it.id }
+        container.library.trashDocuments(ids)
+        _selected.value = emptySet()
+        localMessages.emit(container.appContext.resources.getQuantityString(R.plurals.trashed_files, ids.size, ids.size))
+    }
+
+    fun moveSelected(folderId: Long?) = viewModelScope.launch {
+        container.library.moveDocuments(selectedDocuments().map { it.id }, folderId)
+        _selected.value = emptySet()
+        localMessages.emit(container.appContext.getString(R.string.moved))
+    }
+
+    /** What Convert would do: PDFs become images, image sets become PDFs. Locked PDFs are skipped. */
+    data class ConvertPlan(val pdfIds: List<Long>, val imageDocIds: List<Long>)
+
+    fun convertPlan(): ConvertPlan {
+        val docs = selectedDocuments()
+        return ConvertPlan(
+            pdfIds = docs.filter { it.kind == DocumentKind.PDF && !it.locked }.map { it.id },
+            imageDocIds = docs.filter { it.kind == DocumentKind.IMAGES && it.pageCount > 0 }.map { it.id },
+        )
+    }
+
+    fun convertPdfs(ids: List<Long>, format: ImageFormat, dpi: Int, quality: Int) = viewModelScope.launch {
+        if (ids.isEmpty()) return@launch
+        container.settings.update { it.copy(imageFormat = format, dpi = dpi, jpegQuality = quality) }
+        container.jobs.enqueuePdfToImages(ids, format, dpi, quality)
+        _selected.value = emptySet()
+        localMessages.emit(container.appContext.getString(R.string.job_started))
+    }
+
+    fun makePdfs(ids: List<Long>, pageSize: PageSizeOption, margin: MarginOption) = viewModelScope.launch {
+        if (ids.isEmpty()) return@launch
+        container.settings.update { it.copy(pageSize = pageSize, margin = margin) }
+        ids.forEach { container.jobs.enqueueImagesToPdf(it, pageSize, margin) }
+        _selected.value = emptySet()
+        localMessages.emit(container.appContext.getString(R.string.job_started))
     }
 
     fun setQuery(text: String?) {

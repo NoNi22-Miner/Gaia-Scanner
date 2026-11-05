@@ -29,6 +29,23 @@
     <string name="folder_trash_body">“%1$s” and everything in it go to the trash. You can restore them for 30 days.</string>
     <string name="folder_trashed">Folder moved to trash.</string>
     <string name="modified_on">Modified %1$s</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_move_to_folder">Move to folder</string>
+    <string name="action_convert">Convert</string>
+    <string name="move_to_title">Move to</string>
+    <string name="moved">Moved.</string>
+    <string name="trash_selected_title">Move to trash?</string>
+    <string name="nothing_to_share">Nothing to share. Password-protected files are left out.</string>
+    <string name="nothing_to_convert">Nothing to convert. Password-protected and empty files are skipped.</string>
+    <plurals name="trash_selected_body">
+        <item quantity="one">%d file goes to the trash. You can restore it for 30 days.</item>
+        <item quantity="other">%d files go to the trash. You can restore them for 30 days.</item>
+    </plurals>
+    <plurals name="trashed_files">
+        <item quantity="one">%d file moved to trash.</item>
+        <item quantity="other">%d files moved to trash.</item>
+    </plurals>
     <plurals name="folder_items">
         <item quantity="one">%d item</item>
         <item quantity="other">%d items</item>
@@ -124,8 +141,8 @@
     <string name="action_move_up">Move up</string>
     <string name="action_move_down">Move down</string>
     <string name="action_remove_page">Remove page</string>
-    <string name="delete_title">Delete this file?</string>
-    <string name="delete_body">“%1$s” and its pages will be removed from the app. Copies you saved elsewhere are not affected.</string>
+    <string name="delete_title">Move to trash?</string>
+    <string name="delete_body">“%1$s” goes to the trash. You can restore it for 30 days. Copies you saved elsewhere are not affected.</string>
     <string name="created_at">Added %1$s</string>
     <string name="no_pages">No pages. Add images to start.</string>
     <string name="page_number">Page %1$d</string>
@@ -191,4 +208,56 @@
     <string name="action_choose_folder">Choose folder</string>
     <string name="action_clear">Clear</string>
     <string name="version">Version %1$s</string>
+
+    <!-- Side menu -->
+    <string name="action_open_menu">Open menu</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_trash">Trash</string>
+    <string name="menu_tutorial">Tutorial</string>
+    <string name="menu_feedback">Feature request / bug report</string>
+    <string name="menu_about">About</string>
+
+    <!-- Trash -->
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty">The trash is empty.</string>
+    <string name="trash_hint">Items are deleted for good %1$d days after they were moved here.</string>
+    <string name="trashed_on">Deleted %1$s</string>
+    <plurals name="days_left">
+        <item quantity="one">%d day left</item>
+        <item quantity="other">%d days left</item>
+    </plurals>
+    <string name="action_restore">Restore</string>
+    <string name="action_delete_forever">Delete forever</string>
+    <string name="action_empty_trash">Empty trash</string>
+    <string name="empty_trash_title">Empty the trash?</string>
+    <string name="empty_trash_body">Everything in the trash is deleted for good. This cannot be undone.</string>
+    <string name="delete_forever_title">Delete forever?</string>
+    <string name="delete_forever_body">“%1$s” is deleted for good. This cannot be undone.</string>
+    <string name="document_trashed">Moved to trash.</string>
+
+    <!-- Feedback and About -->
+    <string name="feedback_body">Tell us what to add or what went wrong. Screenshots help.</string>
+    <string name="feedback_telegram">Chat on Telegram (%1$s)</string>
+    <string name="feedback_email">Send an email</string>
+    <string name="feedback_email_subject">%1$s feedback (version %2$s)</string>
+    <string name="feedback_email_body">\n\n—\nApp version: %1$s\nAndroid %2$s (API %3$d)\nPhone: %4$s</string>
+    <string name="no_app_to_open">No app on this phone can open this.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_body">Scan, convert and keep PDFs and images. Everything is processed on your phone. No ads.</string>
+    <string name="about_contact_title">Contact</string>
+    <string name="about_licenses_title">Open-source software</string>
+    <string name="about_licenses_body">OpenCV 4.14.0 (Apache License 2.0)\nAndroid Jetpack libraries, including Compose, CameraX, Room, WorkManager and DataStore (Apache License 2.0)\nKotlin and kotlinx.coroutines (Apache License 2.0)\nMaterial icons (Apache License 2.0)</string>
+
+    <!-- Tutorial (placeholder text, to be reviewed by the owner) -->
+    <string name="action_skip">Skip</string>
+    <string name="action_next">Next</string>
+    <string name="action_get_started">Get started</string>
+    <string name="tutorial_scan_title">Scan with the camera</string>
+    <string name="tutorial_scan_body">Tap Camera. Use Single for one page or Batch for many. Photos stay free of camera watermarks.</string>
+    <string name="tutorial_edit_title">Crop and clean up</string>
+    <string name="tutorial_edit_body">The page edges are found for you. Drag the corners, rotate, pick a filter, adjust brightness, or erase marks.</string>
+    <string name="tutorial_convert_title">Convert</string>
+    <string name="tutorial_convert_body">Turn images into one PDF, or a PDF into JPG or PNG pages. Save to your phone or share.</string>
+    <string name="tutorial_library_title">Keep it tidy</string>
+    <string name="tutorial_library_body">Make folders, sort, search, and select many files at once. Deleted files stay in the trash for 30 days.</string>
 </resources>

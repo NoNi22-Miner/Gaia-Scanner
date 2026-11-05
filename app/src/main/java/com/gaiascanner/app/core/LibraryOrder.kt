@@ -51,6 +51,28 @@ object LibraryOrder {
         return path.asReversed().toList()
     }
 
+    /**
+     * Folders as an indented tree for a "Move to" list: each parent before its
+     * children, siblings in natural name order. Returns (item, depth from 0).
+     * Items whose parent is missing are shown at the top level; loops are cut.
+     */
+    fun <T> flattenTree(items: List<T>, id: (T) -> Long, parentOf: (T) -> Long?, name: (T) -> String): List<Pair<T, Int>> {
+        val ids = items.map(id).toSet()
+        val children = items.groupBy { item -> parentOf(item)?.takeIf { it in ids } }
+        val result = ArrayList<Pair<T, Int>>(items.size)
+        val seen = HashSet<Long>()
+        fun visit(parent: Long?, depth: Int) {
+            val kids = children[parent].orEmpty().sortedWith { a, b -> compareNatural(name(a), name(b)) }
+            for (kid in kids) {
+                if (!seen.add(id(kid))) continue
+                result += kid to depth
+                visit(id(kid), depth + 1)
+            }
+        }
+        visit(null, 0)
+        return result
+    }
+
     private fun compareNatural(a: String, b: String): Int {
         var i = 0
         var j = 0

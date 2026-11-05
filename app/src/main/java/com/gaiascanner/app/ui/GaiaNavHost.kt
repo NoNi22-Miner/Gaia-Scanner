@@ -12,15 +12,21 @@ import com.gaiascanner.app.ui.camera.CameraScreen
 import com.gaiascanner.app.ui.document.DocumentScreen
 import com.gaiascanner.app.ui.editor.PageEditorScreen
 import com.gaiascanner.app.ui.editor.PageEditorViewModel
+import com.gaiascanner.app.ui.info.AboutScreen
+import com.gaiascanner.app.ui.info.TutorialScreen
 import com.gaiascanner.app.ui.jobs.JobsScreen
 import com.gaiascanner.app.ui.library.LibraryScreen
 import com.gaiascanner.app.ui.settings.SettingsScreen
+import com.gaiascanner.app.ui.trash.TrashScreen
 
 private object Routes {
     const val LIBRARY = "library"
     const val DOCUMENT = "document/{id}"
     const val JOBS = "jobs"
     const val SETTINGS = "settings"
+    const val TRASH = "trash"
+    const val TUTORIAL = "tutorial"
+    const val ABOUT = "about"
 
     /** doc = -1 starts a new image document. */
     const val CAMERA = "camera?doc={doc}"
@@ -51,6 +57,9 @@ fun GaiaNavHost() {
                 onOpenJobs = { nav.navigate(Routes.JOBS) },
                 onOpenSettings = { nav.navigate(Routes.SETTINGS) },
                 onOpenCamera = { nav.navigate(Routes.camera(null)) },
+                onOpenTrash = { nav.navigate(Routes.TRASH) },
+                onOpenTutorial = { nav.navigate(Routes.TUTORIAL) { launchSingleTop = true } },
+                onOpenAbout = { nav.navigate(Routes.ABOUT) },
             )
         }
         composable(Routes.DOCUMENT, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
@@ -112,6 +121,15 @@ fun GaiaNavHost() {
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.TRASH) {
+            TrashScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.TUTORIAL) {
+            TutorialScreen(onDone = { nav.popBackStack() })
+        }
+        composable(Routes.ABOUT) {
+            AboutScreen(onBack = { nav.popBackStack() })
         }
     }
 }

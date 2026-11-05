@@ -34,6 +34,8 @@ data class AppSettings(
     /** Library sort, one choice for every folder. Default: newest change first. */
     val librarySort: LibrarySort = LibrarySort(),
     val libraryView: LibraryView = LibraryView.LIST,
+    /** The tutorial opens by itself until it has been shown once. */
+    val tutorialSeen: Boolean = false,
 )
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -62,6 +64,7 @@ class SettingsRepository(private val context: Context) {
             ascending = p[SORT_ASCENDING] ?: false,
         ),
         libraryView = enumOrNull<LibraryView>(p[LIBRARY_VIEW]) ?: LibraryView.LIST,
+        tutorialSeen = p[TUTORIAL_SEEN] ?: false,
     )
 
     private fun write(p: MutablePreferences, s: AppSettings) {
@@ -74,6 +77,7 @@ class SettingsRepository(private val context: Context) {
         p[SORT_FIELD] = s.librarySort.field.name
         p[SORT_ASCENDING] = s.librarySort.ascending
         p[LIBRARY_VIEW] = s.libraryView.name
+        p[TUTORIAL_SEEN] = s.tutorialSeen
     }
 
     private companion object {
@@ -86,6 +90,7 @@ class SettingsRepository(private val context: Context) {
         val SORT_FIELD = stringPreferencesKey("library_sort_field")
         val SORT_ASCENDING = booleanPreferencesKey("library_sort_ascending")
         val LIBRARY_VIEW = stringPreferencesKey("library_view")
+        val TUTORIAL_SEEN = booleanPreferencesKey("tutorial_seen")
 
         inline fun <reified T : Enum<T>> enumOrNull(name: String?): T? =
             name?.let { n -> enumValues<T>().firstOrNull { it.name == n } }

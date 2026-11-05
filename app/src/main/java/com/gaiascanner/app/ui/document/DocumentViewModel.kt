@@ -32,7 +32,7 @@ import java.io.File
 
 class DocumentViewModel(private val container: AppContainer, private val documentId: Long) : ViewModel() {
 
-    /** [loaded] is false until the database answers. [document] is null if it was deleted. */
+    /** [loaded] is false until the database answers. [document] is null if it was deleted or trashed. */
     data class State(val loaded: Boolean = false, val document: DocumentEntity? = null)
 
     data class Message(val text: String, val offerJobs: Boolean = false)
@@ -40,7 +40,7 @@ class DocumentViewModel(private val container: AppContainer, private val documen
     private val context get() = container.appContext
 
     val state: StateFlow<State> = container.library.document(documentId)
-        .map { State(loaded = true, document = it) }
+        .map { State(loaded = true, document = it?.takeIf { doc -> doc.trashedAt == null }) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), State())
 
     val pages: StateFlow<List<PageEntity>> = container.library.pages(documentId)
@@ -74,9 +74,10 @@ class DocumentViewModel(private val container: AppContainer, private val documen
         _messages.emit(Message(importSummary(context, container.library.importImages(uris, documentId))))
     }
 
-    /** The screen closes itself when the document disappears from the database. */
+    /** Moves the document to the trash. The screen closes itself when the document is no longer shown. */
     fun delete() = viewModelScope.launch {
-        container.library.deleteDocument(documentId)
+        container.library.trashDocuments(listOf(documentId))
+        container.postMessage(context.getString(R.string.document_trashed))
     }
 
     fun unlock(password: String) = viewModelScope.launch {

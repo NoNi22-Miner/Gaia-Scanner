@@ -156,7 +156,7 @@ fun DocumentScreen(
                         }
                     }
                     IconButton(onClick = { confirmDelete = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
+                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_move_to_trash))
                     }
                 },
             )
@@ -196,7 +196,7 @@ fun DocumentScreen(
                 TextButton(onClick = {
                     confirmDelete = false
                     vm.delete()
-                }) { Text(stringResource(R.string.action_delete)) }
+                }) { Text(stringResource(R.string.action_move_to_trash)) }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
@@ -394,7 +394,7 @@ private fun PageRow(
 }
 
 @Composable
-private fun ConvertToImagesDialog(
+internal fun ConvertToImagesDialog(
     defaults: AppSettings,
     onDismiss: () -> Unit,
     onStart: (ImageFormat, Int, Int) -> Unit,
@@ -427,7 +427,7 @@ private fun ConvertToImagesDialog(
 }
 
 @Composable
-private fun MakePdfDialog(defaults: AppSettings, onDismiss: () -> Unit, onStart: (PageSizeOption, MarginOption) -> Unit) {
+internal fun MakePdfDialog(defaults: AppSettings, onDismiss: () -> Unit, onStart: (PageSizeOption, MarginOption) -> Unit) {
     var size by rememberSaveable { mutableStateOf(defaults.pageSize) }
     var margin by rememberSaveable { mutableStateOf(defaults.margin) }
     AlertDialog(
