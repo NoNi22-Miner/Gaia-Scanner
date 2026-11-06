@@ -32,6 +32,7 @@ Pro tier (paid):
 - Build (phase 2): AGP 9.5 with built-in Kotlin, Kotlin 2.4.21, KSP 2.3.13, Gradle 9.8.2, compileSdk 37, targetSdk 36. Package name com.gaiascanner.app is a placeholder; make it final before the first Play upload.
 - The cloud sandbox cannot reach dl.google.com or downloads.gradle.org, so the Android build runs only in GitHub Actions (.github/workflows/android.yml). scripts/core-tests-local.sh runs the plain-Kotlin tests locally.
 - Long jobs use WorkManager foreground work with type dataSync (the docs list "local file processing" under it).
+- Test builds for the owner's phone: every push publishes the debug APK to the GitHub Releases page as pre-release "test-<branch>" (file gaia-scanner-test.apk). Debug builds are signed with app/debug.keystore (shared, public, debug only) so new builds install over old ones. Never use it for Play.
 
 ## Phase 3 decisions (owner, 2026-11-05; details in docs/SPEC.md section 8)
 - Trash purges after 30 days. One sort choice for the whole library. Search by name included. List view by default, grid toggle.

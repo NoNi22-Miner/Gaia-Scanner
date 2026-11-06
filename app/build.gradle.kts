@@ -24,6 +24,17 @@ android {
         }
     }
 
+    // One shared debug key, so each CI test build installs over the last one and keeps
+    // the app's files. Debug only: never use this key for a Play upload.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
