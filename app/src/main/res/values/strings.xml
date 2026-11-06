@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gaia Scanner</string>
+
+    <!-- Library -->
+    <string name="library_empty_title">No files yet</string>
+    <string name="library_empty_body">Tap Gallery or Camera below, or use the menu at the top right to import PDFs.</string>
+    <string name="folder_empty">This folder is empty.</string>
+    <string name="search_no_results">No files or folders match.</string>
+    <string name="library_root">Library</string>
+    <string name="action_gallery">Gallery</string>
+    <string name="action_search">Search</string>
+    <string name="search_hint">Search by name</string>
+    <string name="action_up">Up one folder</string>
+    <string name="action_sort">Sort</string>
+    <string name="action_view_list">List view</string>
+    <string name="action_view_grid">Grid view</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_created">Date created</string>
+    <string name="sort_modified">Date modified</string>
+    <string name="sort_size">Size</string>
+    <string name="sort_ascending">Ascending</string>
+    <string name="sort_descending">Descending</string>
+    <string name="action_new_folder">New folder</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_move_to_trash">Move to trash</string>
+    <string name="folder_name">Folder name</string>
+    <string name="folder_trash_title">Move folder to trash?</string>
+    <string name="folder_trash_body">“%1$s” and everything in it go to the trash. You can restore them for 30 days.</string>
+    <string name="folder_trashed">Folder moved to trash.</string>
+    <string name="modified_on">Modified %1$s</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_move_to_folder">Move to folder</string>
+    <string name="action_convert">Convert</string>
+    <string name="move_to_title">Move to</string>
+    <string name="moved">Moved.</string>
+    <string name="trash_selected_title">Move to trash?</string>
+    <string name="nothing_to_share">Nothing to share. Password-protected files are left out.</string>
+    <string name="nothing_to_convert">Nothing to convert. Password-protected and empty files are skipped.</string>
+    <plurals name="trash_selected_body">
+        <item quantity="one">%d file goes to the trash. You can restore it for 30 days.</item>
+        <item quantity="other">%d files go to the trash. You can restore them for 30 days.</item>
+    </plurals>
+    <plurals name="trashed_files">
+        <item quantity="one">%d file moved to trash.</item>
+        <item quantity="other">%d files moved to trash.</item>
+    </plurals>
+    <plurals name="folder_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="kind_pdf">PDF</string>
+    <string name="kind_images">Images</string>
+    <string name="document_locked_short">Password protected</string>
+    <plurals name="pages">
+        <item quantity="one">%d page</item>
+        <item quantity="other">%d pages</item>
+    </plurals>
+
+    <!-- Import -->
+    <string name="action_add">Add</string>
+    <string name="import_pdfs">Import PDFs</string>
+    <string name="import_gallery">Images from gallery</string>
+    <string name="import_image_files">Image files</string>
+    <string name="take_photo">Camera</string>
+    <plurals name="imported_files">
+        <item quantity="one">Imported %d file.</item>
+        <item quantity="other">Imported %d files.</item>
+    </plurals>
+    <string name="import_with_failures">%1$s Not imported: %2$s</string>
+    <string name="import_with_failures_more">%1$s Not imported: %2$s (and %3$d more)</string>
+
+    <!-- Camera -->
+    <string name="no_camera">Could not start the camera.</string>
+    <string name="photo_failed">Could not take the photo. Try again.</string>
+    <string name="camera_permission_needed">Gaia Scanner needs the camera to take photos of documents.</string>
+    <string name="action_allow_camera">Allow camera</string>
+    <string name="action_open_settings">Open settings</string>
+    <string name="action_close">Close</string>
+    <string name="action_shutter">Take photo</string>
+    <string name="action_done">Done</string>
+    <string name="action_discard">Discard</string>
+    <string name="mode_single">Single</string>
+    <string name="mode_batch">Batch</string>
+    <string name="flash_off">Flash off</string>
+    <string name="flash_auto">Flash auto</string>
+    <string name="flash_on">Flash on</string>
+    <string name="discard_photos_title">Discard photos?</string>
+    <plurals name="discard_photos_body">
+        <item quantity="one">%d photo you took will be lost.</item>
+        <item quantity="other">%d photos you took will be lost.</item>
+    </plurals>
+
+    <!-- Page editor -->
+    <string name="page_of">%1$d / %2$d</string>
+    <string name="action_more">More options</string>
+    <string name="action_process_all">Process all</string>
+    <string name="action_discard_page">Discard</string>
+    <string name="action_discard_all">Discard all</string>
+    <plurals name="discard_all_body">
+        <item quantity="one">%d page in this run will be removed.</item>
+        <item quantity="other">%d pages in this run will be removed.</item>
+    </plurals>
+    <string name="action_auto">Auto</string>
+    <string name="action_full_frame">Full</string>
+    <string name="action_rotate_left">Rotate left</string>
+    <string name="action_rotate_right">Rotate right</string>
+    <string name="action_crop">Crop</string>
+    <string name="action_erase">Erase</string>
+    <string name="action_tone">Adjust</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_edit_page">Edit page</string>
+    <string name="tap_to_edit">Tap to edit</string>
+    <string name="edit_hint_crop">Drag the corners or sides onto the edges of the page. The app straightens it.</string>
+    <string name="edit_hint_erase">Brush over marks to remove them.</string>
+    <string name="no_edges_found">No page edges found. Drag the corners by hand.</string>
+    <string name="filter_original">Original</string>
+    <string name="filter_photo">Photo</string>
+    <string name="filter_clear">Clear</string>
+    <string name="filter_docs">Docs</string>
+    <string name="filter_color">Color</string>
+    <string name="tone_brightness">Brightness: %1$d</string>
+    <string name="tone_contrast">Contrast: %1$d</string>
+    <string name="erase_white">White</string>
+    <string name="erase_fill">Smart fill</string>
+    <string name="erase_size">Brush size</string>
+
+    <!-- Document -->
+    <string name="action_back">Back</string>
+    <string name="action_share">Share</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_start">Start</string>
+    <string name="action_save">Save</string>
+    <string name="action_save_to_phone">Save to phone</string>
+    <string name="action_convert_to_images">Convert to images</string>
+    <string name="action_make_pdf">Make PDF</string>
+    <string name="action_unlock">Unlock</string>
+    <string name="action_view_jobs">View</string>
+    <string name="action_move_up">Move up</string>
+    <string name="action_move_down">Move down</string>
+    <string name="action_remove_page">Remove page</string>
+    <string name="action_blank_page_end">Blank page at the end</string>
+    <string name="action_blank_page_after">Insert blank page after</string>
+    <string name="blank_page_added">Blank page added.</string>
+    <string name="delete_title">Move to trash?</string>
+    <string name="delete_body">“%1$s” goes to the trash. You can restore it for 30 days. Copies you saved elsewhere are not affected.</string>
+    <string name="created_at">Added %1$s</string>
+    <string name="no_pages">No pages. Add images to start.</string>
+    <string name="page_number">Page %1$d</string>
+    <string name="document_locked_title">Password protected</string>
+    <string name="document_locked_body">Enter the password to convert this PDF. An unlocked copy is kept in the app.</string>
+    <string name="unlock_body">The app keeps an unlocked copy of this PDF. The password is not stored.</string>
+    <string name="password">Password</string>
+    <string name="unlocked">Unlocked.</string>
+    <string name="saved">Saved.</string>
+    <string name="save_failed">Could not save: %1$s</string>
+    <string name="job_started">Conversion started.</string>
+    <string name="dpi_cap_hint">Very large pages are rendered at a lower DPI to avoid running out of memory.</string>
+
+    <!-- Options -->
+    <string name="setting_format">Format</string>
+    <string name="setting_dpi">Resolution (DPI)</string>
+    <string name="setting_quality_value">JPG quality: %1$d</string>
+    <string name="setting_page_size">Page size</string>
+    <string name="setting_margins">Margins</string>
+    <string name="page_size_fit">Fit image</string>
+    <string name="page_size_a4">A4</string>
+    <string name="page_size_letter">Letter</string>
+    <string name="margin_none">None</string>
+    <string name="margin_small">Small</string>
+    <string name="margin_large">Large</string>
+
+    <!-- Jobs -->
+    <string name="jobs_title">Jobs</string>
+    <string name="jobs_empty">No conversions yet.</string>
+    <string name="job_pdf_to_images">PDF to images</string>
+    <string name="job_images_to_pdf">Images to PDF</string>
+    <string name="job_failures">Not converted:</string>
+    <string name="action_open_result">Open result %1$d</string>
+    <string name="status_queued">Waiting</string>
+    <string name="status_running">Converting</string>
+    <string name="status_cancelling">Stopping</string>
+    <string name="status_done">Done</string>
+    <string name="status_failed">Failed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="progress_page_of">%1$s: page %2$d of %3$d</string>
+    <string name="note_lower_dpi">%1$s: page %2$s used a lower DPI because it is very large.</string>
+    <string name="note_output_folder_failed">Could not copy the result to your output folder. Choose the folder again in Settings.</string>
+    <string name="failure_line">%1$s: %2$s</string>
+    <string name="notification_channel">Conversions</string>
+
+    <!-- Errors -->
+    <string name="error_password">This PDF is password protected. Unlocking needs Android 15 or newer.</string>
+    <string name="error_wrong_password">Wrong password.</string>
+    <string name="error_damaged">The file is damaged or not a valid file of this type.</string>
+    <string name="error_unsupported_format">This image format is not supported on this phone.</string>
+    <string name="error_out_of_space">The phone is out of storage space.</string>
+    <string name="error_too_large">The page or image is too large for this phone\'s memory.</string>
+    <string name="error_missing_file">The file could not be read. It may have been moved or deleted.</string>
+    <string name="error_unknown">Something went wrong.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_pdf_to_images">PDF to images</string>
+    <string name="settings_images_to_pdf">Images to PDF</string>
+    <string name="setting_output_folder">Output folder</string>
+    <string name="setting_output_folder_body">If set, every converted file is also copied to this folder.</string>
+    <string name="setting_output_folder_none">Not set</string>
+    <string name="action_choose_folder">Choose folder</string>
+    <string name="action_clear">Clear</string>
+    <string name="version">Version %1$s</string>
+
+    <!-- Side menu -->
+    <string name="action_open_menu">Open menu</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_trash">Trash</string>
+    <string name="menu_tutorial">Tutorial</string>
+    <string name="menu_feedback">Feature request / bug report</string>
+    <string name="menu_about">About</string>
+
+    <!-- Trash -->
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty">The trash is empty.</string>
+    <string name="trash_hint">Items are deleted for good %1$d days after they were moved here.</string>
+    <string name="trashed_on">Deleted %1$s</string>
+    <plurals name="days_left">
+        <item quantity="one">%d day left</item>
+        <item quantity="other">%d days left</item>
+    </plurals>
+    <string name="action_restore">Restore</string>
+    <string name="action_delete_forever">Delete forever</string>
+    <string name="action_empty_trash">Empty trash</string>
+    <string name="empty_trash_title">Empty the trash?</string>
+    <string name="empty_trash_body">Everything in the trash is deleted for good. This cannot be undone.</string>
+    <string name="delete_forever_title">Delete forever?</string>
+    <string name="delete_forever_body">“%1$s” is deleted for good. This cannot be undone.</string>
+    <string name="document_trashed">Moved to trash.</string>
+
+    <!-- Feedback and About -->
+    <string name="feedback_body">Tell us what to add or what went wrong. Screenshots help.</string>
+    <string name="feedback_telegram">Chat on Telegram (%1$s)</string>
+    <string name="feedback_email">Send an email</string>
+    <string name="feedback_email_subject">%1$s feedback (version %2$s)</string>
+    <string name="feedback_email_body">\n\n—\nApp version: %1$s\nAndroid %2$s (API %3$d)\nPhone: %4$s</string>
+    <string name="no_app_to_open">No app on this phone can open this.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_body">Scan, convert and keep PDFs and images. Everything is processed on your phone. No ads.</string>
+    <string name="about_contact_title">Contact</string>
+    <string name="about_licenses_title">Open-source software</string>
+    <string name="about_licenses_body">OpenCV 4.14.0 (Apache License 2.0)\nAndroid Jetpack libraries, including Compose, CameraX, Room, WorkManager and DataStore (Apache License 2.0)\nKotlin and kotlinx.coroutines (Apache License 2.0)\nMaterial icons (Apache License 2.0)</string>
+
+    <!-- Tutorial (placeholder text, to be reviewed by the owner) -->
+    <string name="action_skip">Skip</string>
+    <string name="action_next">Next</string>
+    <string name="action_get_started">Get started</string>
+    <string name="tutorial_scan_title">Scan with the camera</string>
+    <string name="tutorial_scan_body">Tap Camera. Use Single for one page or Batch for many. Photos stay free of camera watermarks.</string>
+    <string name="tutorial_edit_title">Crop and clean up</string>
+    <string name="tutorial_edit_body">The page edges are found for you. Drag the corners, rotate, pick a filter, adjust brightness, or erase marks.</string>
+    <string name="tutorial_convert_title">Convert</string>
+    <string name="tutorial_convert_body">Turn images into one PDF, or a PDF into JPG or PNG pages. Save to your phone or share.</string>
+    <string name="tutorial_library_title">Keep it tidy</string>
+    <string name="tutorial_library_body">Make folders, sort, search, and select many files at once. Deleted files stay in the trash for 30 days.</string>
+
+    <!-- PDF tools -->
+    <string name="tool_reduce">Reduce file size</string>
+    <string name="tool_watermark">Add watermark</string>
+    <string name="suffix_small">small</string>
+    <string name="suffix_watermark">watermark</string>
+    <string name="tool_saved">Saved as “%1$s”.</string>
+    <string name="tool_raster_note">Pages are saved as images, so text in the copy can no longer be selected or searched. The original is kept.</string>
+    <string name="reduce_current_size">Now: %1$s</string>
+    <string name="preset_high">High</string>
+    <string name="preset_high_body">Best quality, 150 DPI</string>
+    <string name="preset_medium">Medium</string>
+    <string name="preset_medium_body">Balanced, 120 DPI</string>
+    <string name="preset_small">Small</string>
+    <string name="preset_small_body">Smallest file, 90 DPI</string>
+    <string name="action_make_smaller_copy">Make smaller copy</string>
+    <string name="reduce_hint">Works best on scanned or photo PDFs. A PDF that is mostly text can get bigger.</string>
+    <string name="tool_working">Page %1$d of %2$d</string>
+    <string name="reduce_result">Original %1$s → copy %2$s (%3$d%% smaller)</string>
+    <string name="reduce_not_smaller">The copy is not smaller (original %1$s, copy %2$s). Try a smaller preset.</string>
+    <string name="action_keep_copy">Save copy</string>
+    <string name="action_discard_copy">Discard</string>
+    <string name="watermark_text">Watermark text</string>
+    <string name="watermark_text_hint">For example: © Your Name 2026</string>
+    <string name="watermark_size">Size: %1$d%%</string>
+    <string name="watermark_opacity">Opacity: %1$d%%</string>
+    <string name="watermark_angle">Angle: %1$d°</string>
+    <string name="watermark_color">Color</string>
+    <string name="watermark_single">Single</string>
+    <string name="watermark_tiled">Tiled</string>
+    <string name="action_save_watermarked">Save as new PDF</string>
+    <string name="watermark_images_note">The new PDF uses the page size and margins from Settings. The original is kept.</string>
+    <string name="color_gray">Gray</string>
+    <string name="color_black">Black</string>
+    <string name="color_red">Red</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_white">White</string>
+</resources>
